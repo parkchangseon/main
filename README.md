@@ -24,22 +24,24 @@
 # 서비스 시나리오
 
 기능적 요구사항
-1. 점주는 객실을 등록할 수 있다
+1. 숙박관리자는 객실을 등록할 수 있다
 2. 고객이 객실을 선택하여 예약한다.
 3. 예약이 완료되면 해당 객실은 '예약불가' 상태로 변경된다.
-4. 결제가 완료되면 예약이 확정된다.
+4. 결제가 완료되면 객실 예약이 확정된다.
 5. 고객이 예약을 취소할 수 있다.
-6. 점주가 객실을 체크아웃 하면 객실은 예약가능 상태로 변경된다.
+6. 숙박관리자가 객실을 체크아웃 하면 객실은 예약가능 상태로 변경된다.
 7. 고객이 숙소 예약상태를 중간중간 조회한다.
+8. 예약상태가 바뀔 때 마다 카톡으로 알림을 보낸다
 
 비기능적 요구사항
 1. 트랜잭션
-    1. 결제가 되지 않은 예약건은 아예 예약이 완료되지 않아야 한다  Sync 호출 
+    i. 결제가 되지 않은 예약건은 아예 예약이 완료되지 않아야 한다  Sync 호출 
 2. 장애격리
-    1. 객실관리시스템이 수행되지 않더라도 객실 예약은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
-    1. 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도한다  Circuit breaker, fallback
+    i. 객실관리시스템이 수행되지 않더라도 객실 예약은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
+    ii. 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도한다  Circuit breaker, fallback
 3. 성능
-    1. 고객이 자주 객실관리시스템에서 확인할 수 있는 객실상태를 예약시스템(프론트엔드)에서 확인할 수 있어야 한다  CQRS
+    i. 고객이 자주 객실관리시스템에서 확인할 수 있는 객실상태를 예약시스템(프론트엔드)에서 확인할 수 있어야 한다  CQRS
+    ii. 객실상태가 바뀔때마다 카톡 등으로 알림을 줄 수 있어야 한다 Event driven
 
 
 # 체크포인트
@@ -100,30 +102,29 @@
 
 
 ## AS-IS 조직 (Horizontally-Aligned)
-  ![image](https://user-images.githubusercontent.com/487999/79684144-2a893200-826a-11ea-9a01-79927d3a0107.png)
+![image](https://user-images.githubusercontent.com/69283674/97150539-99af8800-17b1-11eb-8b8e-c6b8bcd1d537.png)
 
 ## TO-BE 조직 (Vertically-Aligned)
-  ![image](https://user-images.githubusercontent.com/52994285/81630694-3a4aff00-9441-11ea-8826-482c404585f7.png)
+![image](https://user-images.githubusercontent.com/69283674/97150593-b350cf80-17b1-11eb-8c7f-68c5be80badc.png)
 
 [조직 KPI]
 예약팀 : 고객의 예약을 최대한 많이 받아야 함.
 결제팀 : 결제 안정성을 최대한 확보해야 함.
-객실관리팀 : 고객의 객실평가 점수가 높아야 함.
+객실팀 : 고객의 객실평가 점수가 높아야 함.
 
 ## Event Storming 결과
 * MSAEz 로 모델링한 이벤트스토밍 결과: 
-![image](https://user-images.githubusercontent.com/36434874/81758539-177e2080-94fd-11ea-8f94-889773315098.png)
+![image](https://user-images.githubusercontent.com/69283674/97150799-0034a600-17b2-11eb-9835-7e8c8f6f6089.png)
 
 
-### 이벤트 도출 및 부적격 이벤트 탈락
-
-![image](https://user-images.githubusercontent.com/52994285/81631466-e4775680-9442-11ea-94db-ca75e5f90eb5.png)
-
-
-
+### 이벤트 도출
+![image](https://user-images.githubusercontent.com/69283674/97150926-307c4480-17b2-11eb-8c70-251530e0d9fd.png)
+    
+### 부적격 이벤트 탈락
+![image](https://user-images.githubusercontent.com/69283674/97151026-4ee24000-17b2-11eb-8b90-2e035743d335.png)
 
     - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행함
-        - 검색시>객실 조회됨  :  UI 의 이벤트이지, 업무적인 의미의 이벤트가 아니라서 제외
+        - 결재시>결재버튼이 클릭됨  : UI 의 이벤트이지, 업무적인 의미의 이벤트가 아니라서 제외
 
 ### 액터 및 커맨드 부착하여 읽기 좋게
 ![image](https://user-images.githubusercontent.com/52994285/81630900-b80f0a80-9441-11ea-9908-5dfb5a81cfd7.png)
