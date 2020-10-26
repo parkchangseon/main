@@ -171,8 +171,10 @@ kubectl get pods
 * Siege 
 
 
+* 새버전으로의 배포 시작
+kubectl set image deploy reservation reservation=team04acr.azurecr.io/reservation:latest
 
-
+/payment/kubernetes& kubetctl apply -f deployment.yml
 
 
 
