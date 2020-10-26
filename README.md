@@ -2,7 +2,7 @@
 
 
 # 객실예약서비스
-- 3조
+- 4조
 
 # Table of contents
 
@@ -35,12 +35,17 @@
 
 비기능적 요구사항
 1. 트랜잭션
+
     i. 결제가 되지 않은 예약건은 아예 예약이 완료되지 않아야 한다  Sync 호출 
 2. 장애격리
+
     i. 객실관리시스템이 수행되지 않더라도 객실 예약은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
+    
     ii. 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도한다  Circuit breaker, fallback
 3. 성능
-    i. 고객이 자주 객실관리시스템에서 확인할 수 있는 객실상태를 예약시스템(프론트엔드)에서 확인할 수 있어야 한다  CQRS
+
+    i. 고객이 객실상태를 예약시스템(프론트엔드)에서 확인할 수 있어야 한다  CQRS    
+    
     ii. 객실상태가 바뀔때마다 카톡 등으로 알림을 줄 수 있어야 한다 Event driven
 
 
@@ -114,7 +119,7 @@
 
 ## Event Storming 결과
 * MSAEz 로 모델링한 이벤트스토밍 결과: 
-![image](https://user-images.githubusercontent.com/69283674/97150799-0034a600-17b2-11eb-9835-7e8c8f6f6089.png)
+URL 넣기
 
 
 ### 이벤트 도출
@@ -127,83 +132,82 @@
         - 결재시>결재버튼이 클릭됨  : UI 의 이벤트이지, 업무적인 의미의 이벤트가 아니라서 제외
 
 ### 액터 및 커맨드 부착하여 읽기 좋게
-![image](https://user-images.githubusercontent.com/52994285/81630900-b80f0a80-9441-11ea-9908-5dfb5a81cfd7.png)
 
+![image](https://user-images.githubusercontent.com/69283674/97151489-e8a9ed00-17b2-11eb-879d-75de8f6a129b.png)
+
+
+### 어그리게잇으로 묶기
+
+![image](https://user-images.githubusercontent.com/69283674/97152033-af25b180-17b3-11eb-91dd-cfe3e514cfd6.png)
 
 ### 바운디드 컨텍스트로 묶기
 
-![image](https://user-images.githubusercontent.com/52994285/81631668-52238280-9443-11ea-8d44-a08a43e8b898.png)
-
-![image](https://user-images.githubusercontent.com/52994285/81632109-6f0c8580-9444-11ea-8c5c-98bc146ad339.png)
+![image](https://user-images.githubusercontent.com/69283674/97152594-79cd9380-17b4-11eb-9bbe-5e0f02421917.png)
 
     - 도메인 서열 분리 
-        - Core Domain:  ReservationManagement : 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 app 의 경우 1주일 1회 미만, store 의 경우 1개월 1회 미만
-        - Supporting Domain:   RoomManagement : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
-        - General Domain:   paymentManagement : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
+        - Core Domain:  Reservation : 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 app 의 경우 1주일 1회 미만
+        - Supporting Domain:   Room : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
+        - General Domain:   Payment : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
 
-### 폴리시 부착 및 폴리시의 이동 후  컨텍스트 매핑 (파란선은 Pub/Sub, 빨간선은 Req/Resp)
+### 폴리시 부착 (괄호는 수행주체, 폴리시 부착을 둘째단계에서 해놔도 상관 없음. 전체 연계가 초기에 드러남)
 
-![image](https://user-images.githubusercontent.com/52994285/81631853-d0802480-9443-11ea-9e20-2e97cf4f5640.png)
-
-
-
-### 완성된 1차 모형
-
-![image](https://user-images.githubusercontent.com/52994285/81632152-8481af80-9444-11ea-8859-6fd41cba4fde.png)
+![image](https://user-images.githubusercontent.com/69283674/97152713-a4b7e780-17b4-11eb-9bb5-8f498bf5de5f.png)
 
 
-### 1차 완성본에 대한 기능적/비기능적 요구사항을 커버하는지 검증
+### 폴리시의 이동과 컨텍스트 매핑 (점선은 Pub/Sub, 실선은 Req/Resp)
+
+![image](https://user-images.githubusercontent.com/69283674/97153018-2871d400-17b5-11eb-9773-276a38813eb9.png)
 
 
-![image](https://user-images.githubusercontent.com/52994285/81779409-a015b480-952f-11ea-9d4d-69b12228e8eb.png)
+### 1차 완성본
+
+![image](https://user-images.githubusercontent.com/69283674/97153154-63740780-17b5-11eb-904e-74bb90a97738.png)
+
+### 기능적 요구사항을 커버하는지 검증(1)
+
+![image](https://user-images.githubusercontent.com/69283674/97153235-81416c80-17b5-11eb-8d93-ab678184e2c7.png)
 
 기능적 요구사항
+    - 숙박관리자는 객실을 등록할 수 있다 (OK)
+    - 고객이 객실을 선택하여 예약한다 (OK)
+    - 예약이 완료되면 해당 객실은 '예약불가' 상태로 변경된다 (OK)
+    - 결제가 완료되면 예약이 확정된다 (OK)
 
-    - 고객은 예약 가능한 객실을 조회할 수 있다
-    - 고객이 객실을 선택하여 예약한다.
-    - 고객은 예약을 취소할 수 있다.
-    - 예약이 완료되면 해당 객실은 '예약불가' 상태로 변경된다.
-    - 결제가 완료되면 예약이 완료된다.
-    - 고객은 결제를 취소할 수 있다.
-    - 고객이 체크아웃 하면 관리자에게 객실 정비 요청이 된다.
-    - 고객은 객실에 대한 평가를 등록한다.
+### 기능적 요구사항을 커버하는지 검증(2)
 
+![image](https://user-images.githubusercontent.com/69283674/97153635-28260880-17b6-11eb-9e2c-225e1407d31f.png)
 
-### 모델 수정
-
-![image](https://user-images.githubusercontent.com/52994285/81639583-52c61400-9457-11ea-9954-a79ecaeba812.png)
-    
-    - 수정된 모델은 모든 요구사항을 커버함.
-    
-    
+기능적 요구사항
+    - 고객은 예약을 취소할 수 있다 (OK)
+    - 예약이 취소되면 해당 객실은 '예약가능' 상태로 변경된다 (OK)
+    - 고객이 숙소 예약상태를 중간중간 조회한다 (OK)
+    - 예약상태가 바뀔떄마다 알람을 보낸다 (OK)
 
 
 ### 비기능 요구사항에 대한 검증
 
-
+![image](https://user-images.githubusercontent.com/69283674/97153970-ada9b880-17b6-11eb-877b-95b4f9813a7d.png)
 
 트랜잭션
  - 결제가 되지 않은 예약건은 아예 예약이 완료되지 않아야 한다 Sync 호출
 장애격리
- - 결제시스템이 수행되지 않더라도 객실 예약은 365일 24시간 받을 수 있어야 한다 Async (event-driven), Eventual Consistency
+ - 객실관리시스템이 수행되지 않더라도 객실 예약은 365일 24시간 받을 수 있어야 한다 Async (event-driven), Eventual Consistency
  - 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도한다 Circuit breaker, fallback
 성능
- - 고객이 자주 객실관리시스템에서 확인할 수 있는 객실상태를 예약시스템(프론트엔드)에서 확인할 수 있어야 한다 CQRS
+ - 고객이 객실상태를 수신하여 예약시스템(프론트엔드)에서 확인할 수 있어야 한다 CQRS
+ - 예약상태가 바뀔때마다 카톡 등으로 알림을 줄 수 있어야 한다 Event driven
 
-   - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
-   - 예약 시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 주문와료시 결제처리에 대해서는 Request-Response 방식 처리
-   - 결제 완료시 점주연결 및 배송처리:  App(front) 에서 Store 마이크로서비스로 주문요청이 전달되는 과정에 있어서 Store 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
-   - 나머지 모든 inter-microservice 트랜잭션: 주문상태, 배달상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
+ - 마이크로 서비스를 넘나드는 시나리오에 대한 트랜잭션 처리
+ - 예약 시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 예약완료시 결제처리에 대해서는 Request-Response 방식 처리
+ - 결제 완료시 객실연결 및 확정처리:  App(front) 에서 Room 마이크로서비스로 예약요청이 전달되는 과정에 있어서 Room 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
+ - 나머지 모든 inter-microservice 트랜잭션: 예약상태, 결제상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 
 
 
 
 ## 헥사고날 아키텍처 다이어그램 도출
     
-
-![image](https://user-images.githubusercontent.com/52994285/81779998-bb34f400-9530-11ea-9d41-5da175322c2f.png)
-
-
+![image](https://user-images.githubusercontent.com/69283674/97154475-40e2ee00-17b7-11eb-9bd6-1d19a6f9e157.png)
 
     - Inbound adaptor와 Outbound adaptor를 구분함
     - 호출관계에서 PubSub 과 Req/Resp 를 구분함
