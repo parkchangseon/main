@@ -1,66 +1,108 @@
 
-1. ¸®¼Ò½º±×·ì
-¸®¼Ò½º±×·ì¸í:  team3
-¿µ¿ª: ÇÑ±¹ÁßºÎ
+1. ë¦¬ì†ŒìŠ¤ê·¸ë£¹
+ë¦¬ì†ŒìŠ¤ê·¸ë£¹ëª…:  team4
 
-2.Äí¹ö³×Æ¼½º¼­ºñ½º(Å¬·¯½ºÅÍ)
-Å¬·¯½ºÅÍ¸í:  team3-aks
-DNS ÀÌ¸§ Á¢µÎ»ç: team3-aks-dns
-³ëµå¼ö: 2°³
+2.ì¿ ë²„ë„¤í‹°ìŠ¤ì„œë¹„ìŠ¤(í´ëŸ¬ìŠ¤í„°)
+í´ëŸ¬ìŠ¤í„°ëª…:  team4-aks
+ì§€ì—­: í•œêµ­ì¤‘ë¶€
+ë²„ì „ : 1.17.11
+ë…¸ë“œìˆ˜: 3ê°œ
 
-3.Äí¹ö³×Æ¼½º Registry
-·¹Áö½ºÆ®¸®¸í:  team3acr
+3.Container Registry
+ë ˆì§€ìŠ¤íŠ¸ë¦¬ëª…:  team04acr
 
 ------------------------------------------------
-4. ¸®¼Ò½º±×·ì°ú Å¬·¯½ºÅÍ ¿¬°á
-az aks get-credentials --resource-group team3 --name team3-aks
+--ì½˜ì†”ì—´ì–´ì„œ ì½˜ì†”ì—ì„œ í´ëŸ¬ìŠ¤í„° ì—°ê²°í•˜ê¸°
+4. ë¦¬ì†ŒìŠ¤ê·¸ë£¹ê³¼ í´ëŸ¬ìŠ¤í„° ì—°ê²°
+az aks get-credentials --resource-group team4 --name team4-aks
 
-5. Å¬·¯½ºÅÍ¿¡¼­ acr ¿¬°á
-az aks update -n team3-aks -g team3 --attach-acr team3acr
+5. ë¡œê·¸ì¸
+az acr login --name team04acr
+
+5. í´ëŸ¬ìŠ¤í„°ì—ì„œ acr ì—°ê²°
+az aks update -n team4-aks -g team4 --attach-acr team04acr
+
+6. í™•ì¸
+kubectl get all
+kubectl config current-context
+kubectl delete deploy,service --all
 
 -------------------------------------------------
-6.  Kafka ¼³Ä¡
+6.  Kafka ì„¤ì¹˜
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
 
-7. Kafka ³×ÀÓ½ºÆäÀÌ½º»ı¼º
+7. Kafka ë„¤ì„ìŠ¤í˜ì´ìŠ¤ìƒì„±
 kubectl create ns kafka
 
-8. Äí¹ö³×Æ¼½º¿¡ kafka ¹èÆ÷
+8. ì¿ ë²„ë„¤í‹°ìŠ¤ì— kafka ë°°í¬
 helm install my-kafka --namespace kafka incubator/kafka
 
-9. kafka Å×½ºÆ®
-eventTopicÀÌ¸§À¸·ÎÅäÇÈ»ı¼º: 
-kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --topic eventTopic --create --partitions 1 --replication-factor 1
+9. kafka í† í”½ë§Œë“¤ê¸° (hotelmanage ì´ë¦„ìœ¼ë¡œí† í”½ìƒì„±)
+kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --topic hotelmanage ---create --partitions 1 --replication-factor 1
 
-¸Ş½ÃÁö¼Û½Å
+-í† í”½ ëª©ë¡ í™•ì¸
+kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --list
+-í† í”½ ë©”ì„¸ì§€ ìƒì„±
 kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-producer --broker-list my-kafka:9092 --topic eventTopic
-¼ö½Å(´ë±â)
-kubec
+-í† í”½ í™•ì¸
+kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic shop --from-beginning
 
-=================== 3. dev.Auzre.com¿¡¼­ Pipeline »ı¼º¼³Á¤ ===========================================
-dev.azure.com Á¢¼Ó
+==========================================================
+*Labì— í•„ìš”í•œ ë¦¬ì†ŒìŠ¤ ë‚´ë ¤ë°›ê¸°
+git clone https://github.com/accommodationMgt/Gateway.git
+git clone https://github.com/accommodationMgt/Reservation.git
+git clone https://github.com/accommodationMgt/Room.git
+git clone https://github.com/accommodationMgt/Notice.git
+git clone https://github.com/accommodationMgt/Payment.git
 
-1. team3 ÇÁ·ÎÁ§Æ® »ı¼º
+*ë§ˆì´í¬ë¡œì„œë¹„ìŠ¤ ë°°í¬
+-ê°ì‹¤(Room) ì„œë¹„ìŠ¤ 
+cd Room
+mvn package -Dmaven.test.skip=true
+az acr build --registry team04acr --image team04acr.azurecr.io/room:latest .
+kubectl create deploy room --image=team04acr.azurecr.io/room:latest
+kubectl expose deploy room --type="ClusterIP" --port=8080
 
-2.[ Pipeline ÃÊ±â ¼¼ÆÃ]
-- Project Settings > Service Connections ¼³Á¤
- ¤¤ Docker Registry ¼±ÅÃ ¹×  Azure container Registry ¼±ÅÃ
- ¤¤ Service Connection ¸í: team3Conn
+* ì„œë¹„ìŠ¤ í™•ì¸
+kubectl get po   
+kubectl get deployments  
+kubectl get svc   
+kubectl get replicaset  
+kubectl get all
 
-3.[Pipeline Library»ı¼º -¼Ò½ºÀÇ °øÅëºÎºĞ Ã³¸®¸¦À§ÇØ »ç¿ë] - azurepipeline.yml ÆÄÀÏ È®ÀÎ
+
+* ì„¤ì •íŒŒì¼(YAML)ì„ í†µí•œ Pod ë°°í¬ (ì§ì ‘ íƒ€ì´í•‘)
+kubectl create -f declarative-pod.yaml
+kubectl get pods
+
+* Siege 
+
+
+
+=================== 3. dev.Auzre.comì—ì„œ Pipeline ìƒì„±ì„¤ì • ===========================================
+dev.azure.com ì ‘ì†
+
+1. team4 í”„ë¡œì íŠ¸ ìƒì„±
+
+2.[ Pipeline ì´ˆê¸° ì„¸íŒ…]
+- Project Settings > Service Connections ì„¤ì •
+ ã„´ Docker Registry ì„ íƒ ë°  Azure container Registry ì„ íƒ
+ ã„´ Service Connection ëª…: team4Conn
+
+3.[Pipeline Libraryìƒì„± -ì†ŒìŠ¤ì˜ ê³µí†µë¶€ë¶„ ì²˜ë¦¬ë¥¼ìœ„í•´ ì‚¬ìš©] - azurepipeline.yml íŒŒì¼ í™•ì¸
 - Pipeline > library
- ¤¤ VariableÃß°¡: ±×·ì¸í team3vg
-   ¤¤containerRegistry : team3acr.azurecr.io
-   ¤¤containerRegistryDockerConnection : team3Conn
-   ¤¤environment : team3env
+ ã„´ Variableì¶”ê°€: ê·¸ë£¹ëª… team4vg
+   ã„´containerRegistry : team4acr.azurecr.io
+   ã„´containerRegistryDockerConnection : team4Conn
+   ã„´environment : team4env
 
-4.  È¯°æº¯¼ö Ãß°¡ 
- ¤¤ Pipeline > Environments
-   ¤¤ Å¬·¯½ºÅÍ ¿¬°á ¼³Á¤ ÇÔ.
+4.  í™˜ê²½ë³€ìˆ˜ ì¶”ê°€ 
+ ã„´ Pipeline > Environments
+   ã„´ í´ëŸ¬ìŠ¤í„° ì—°ê²° ì„¤ì • í•¨.
 
-5. [ Pipeline »ı¼º] > ºôµå>¹èÆ÷ ÇÑ¹ø¿¡ ¼öÇà
--  (github yml) ¼±ÅÃÇÏ¿© ½ÃÀÛÇÔ.
--  github ¿¡¼­ pipeline »ı¼ºÇÒ ÇÁ·ÎÁ§Æ®¸¦ ¼±ÅÃÇÏ¿© Run
+5. [ Pipeline ìƒì„±] > ë¹Œë“œ>ë°°í¬ í•œë²ˆì— ìˆ˜í–‰
+-  (github yml) ì„ íƒí•˜ì—¬ ì‹œì‘í•¨.
+-  github ì—ì„œ pipeline ìƒì„±í•  í”„ë¡œì íŠ¸ë¥¼ ì„ íƒí•˜ì—¬ Run
 
 
 
@@ -72,19 +114,19 @@ https://github.com/hotelmanage3/PaymentManagement.git
 https://github.com/hotelmanage3/gateway.git
 
 ==========================================================
--¼­Å¶ºê·¹ÀÌÄ¿¸¦ ÅëÇÑ Àå¾Ö°İ¸®
+-ì„œí‚·ë¸Œë ˆì´ì»¤ë¥¼ í†µí•œ ì¥ì• ê²©ë¦¬
 : 
 
-- ½ºÄÉÀÏ¾Æ¿ô
+- ìŠ¤ì¼€ì¼ì•„ì›ƒ
 :
 
 - CQRS
-: °í°´ÀÌ ¿¹¾àÇöÈ² Á¶È¸ ½Ã ¿¹¾à³»¿ª+°´½Ç»óÅÂ¸¦ °°ÀÌ Á¶È¸
+: ê³ ê°ì´ ì˜ˆì•½í˜„í™© ì¡°íšŒ ì‹œ ì˜ˆì•½ë‚´ì—­+ê°ì‹¤ìƒíƒœë¥¼ ê°™ì´ ì¡°íšŒ
 
-- Readyness  Probe ¼³Á¤À» ÅëÇØ ¹«Á¤Áö CI/CD Å×½ºÆ®
+- Readyness  Probe ì„¤ì •ì„ í†µí•´ ë¬´ì •ì§€ CI/CD í…ŒìŠ¤íŠ¸
 :
 
-- Liveness ¸¦ ÅëÇÑ ¼¿ÇÁÈú¸µ 
+- Liveness ë¥¼ í†µí•œ ì…€í”„íë§ 
 :
 
 
@@ -92,8 +134,41 @@ https://github.com/hotelmanage3/gateway.git
 
  kubectl exec -it httpie bin/bash
 
+==========================================================
+* Azure ë ˆì§€ìŠ¤íŠ¸ë¦¬(ACR)ì— ë„ì»¤ ì´ë¯¸ì§€ í‘¸ì‹œí•˜ê¸°
+az acr build --registry team04acr --image team04acr.azurecr.io/[ì´ë¯¸ì§€ëª…]:latest .
+
+==========================================================
+
+==========================================================
+*Labì— í•„ìš”í•œ ë¦¬ì†ŒìŠ¤ ë‚´ë ¤ë°›ê¸°
+git clone https://github.com/accommodationMgt/Gateway.git
+git clone https://github.com/accommodationMgt/Reservation.git
+git clone https://github.com/accommodationMgt/Room.git
+git clone https://github.com/accommodationMgt/Notice.git
+git clone https://github.com/accommodationMgt/Payment.git
+
+*ë§ˆì´í¬ë¡œì„œë¹„ìŠ¤ ë°°í¬
+-ê°ì‹¤(Room) ì„œë¹„ìŠ¤ 
+cd Room
+mvn package -Dmaven.test.skip=true
+az acr build --registry (myregistry) --image team04acr.azurecr.io/room:latest .
+kubectl create deploy products --image=team04acr.azurecr.io/room:latest
+kubectl expose deploy products --type="ClusterIP" --port=8080
+
+* ì„œë¹„ìŠ¤ í™•ì¸
+kubectl get pods   # pods = pod = po
+kubectl get deployments   # deploy
+kubectl get services    # svc
+kubectl get replicaset    # rs
+kubectl get all
 
 
+* ì„¤ì •íŒŒì¼(YAML)ì„ í†µí•œ Pod ë°°í¬ (ì§ì ‘ íƒ€ì´í•‘)
+kubectl create -f declarative-pod.yaml
+kubectl get pods
+
+* Siege 
 
 
 
