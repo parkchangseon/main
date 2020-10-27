@@ -654,3 +654,31 @@ kubectl get deploy payment -w
 
 ![image](https://user-images.githubusercontent.com/69283674/97295982-5fb6b280-1893-11eb-89ef-741b220b2201.png)
 
+
+### 무정지 재배포
+
+- 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
+- seige 로 배포작업 직전에 워크로드를 모니터링 함.
+![image](https://user-images.githubusercontent.com/69283674/97297532-837af800-1895-11eb-868d-f7c70ab6b3c6.png)
+
+
+- 새버전으로의 배포 시작
+![image](https://user-images.githubusercontent.com/69283674/97297979-1d42a500-1896-11eb-97b9-cba907471356.png)
+
+- seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
+```
+Transactions:		        2962 hits
+Availability:		       80.45 %
+Elapsed time:		       29.99 secs
+Data transferred:	        0.75 MB
+Response time:		        0.01 secs
+Transaction rate:	       98.77 trans/sec
+Throughput:		        0.02 MB/sec
+Concurrency:		       1.46
+```
+
+
+- 동일한 시나리오로 재배포 한 후 Availability 확인:
+![image](https://user-images.githubusercontent.com/69283674/97297629-a1e0f380-1895-11eb-89f3-acc70aa3a30c.png)
+
+배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
