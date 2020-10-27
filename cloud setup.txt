@@ -12,41 +12,54 @@
 레지스트리명:  team04acr
 
 ------------------------------------------------
---콘솔열어서 콘솔에서 클러스터 연결하기
-4. 리소스그룹과 클러스터 연결
+==========================================================
+* 클러스터에 배포 (AZURE)
+==========================================================
+--콘솔열어서 콘솔에서 클러스터 연결하기(az login)
+--az acr login --name team04acr
+4. Azure 클러스터 연결
 az aks get-credentials --resource-group team4 --name team4-aks
 
-5. 로그인
-az acr login --name team04acr
-
-5. 클러스터에서 acr 연결
+5. Azure 클러스터에 레지스트리 붙이기
 az aks update -n team4-aks -g team4 --attach-acr team04acr
 
 6. 확인
 kubectl get all
 kubectl config current-context
-kubectl delete deploy,service --all
+--kubectl delete deploy,service --all
 
--------------------------------------------------
-6.  Kafka 설치
+==========================================================
+* 클러스터에 kafka 설치
+==========================================================
+6. Kafka 설치
 curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+kubectl --namespace kube-system create sa tiller
+kubectl create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
+helm repo add incubator http://storage.googleapis.com/kubernetes-charts-incubator
+helm repo update
+helm install --name my-kafka --namespace kafka incubator/kafka
 
 7. Kafka 네임스페이스생성
 kubectl create ns kafka
 
-8. 쿠버네티스에 kafka 배포
-helm install my-kafka --namespace kafka incubator/kafka
+8. kafka 토픽만들기 (accommodation 이름으로토픽생성)
+kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --topic accommodation --create --partitions 1 --replication-factor 1
 
-9. kafka 토픽만들기 (hotelmanage 이름으로토픽생성)
-kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --topic hotelmanage ---create --partitions 1 --replication-factor 1
+8. kafka 토픽만들기 (hotelmanage 이름으로토픽생성)
+kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --topic hotelmanage --create --partitions 1 --replication-factor 1
 
 -토픽 목록 확인
 kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-zookeeper:2181 --list
--토픽 메세지 생성
-kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-producer --broker-list my-kafka:9092 --topic eventTopic
--토픽 확인
-kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic shop --from-beginning
 
+-토픽 메세지 생성
+kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-producer --broker-list my-kafka:9092 --topic accommodation
+-토픽 확인
+kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic accommodation --from-beginning
+
+==========================================================
+*코드 패키징
 ==========================================================
 *Lab에 필요한 리소스 내려받기
 git clone https://github.com/accommodationMgt/Gateway.git
