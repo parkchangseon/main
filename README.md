@@ -583,9 +583,11 @@ Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 
 각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 AZURE를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 azure-pipelines.yml 에 포함되었다.
 
 -  아래와 같이 pod 가 정상적으로 올라간 것을 확인하였다. 
+
 ![image](https://user-images.githubusercontent.com/69283674/97273735-10628900-1877-11eb-9f62-2d5fccea4c13.png)
 
 -  아래와 같이 쿠버네티스에 모두 서비스로 등록된 것을 확인할 수 있다. 
+
 ![image](https://user-images.githubusercontent.com/69283674/97273520-d6918280-1876-11eb-8530-1447d2000735.png)
 
 
@@ -664,7 +666,6 @@ kubectl get deploy payment -w
 
 
 - 새버전으로의 배포 시작
-![image](https://user-images.githubusercontent.com/69283674/97297979-1d42a500-1896-11eb-97b9-cba907471356.png)
 
 - seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
 ```
