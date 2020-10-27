@@ -638,6 +638,7 @@ kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
 
 
 - 결제서비스의 deployment.yaml의 spec에 아래와 같이 자원속성을 설정한다:
+
 ![image](https://user-images.githubusercontent.com/69283674/97291666-8f62bc00-188d-11eb-9594-c14a11328bb0.png)
 
 - CB 에서 했던 방식대로 워크로드를 1분 동안 걸어준다.
@@ -679,6 +680,7 @@ Concurrency:		       1.46
 
 
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
+
 ![image](https://user-images.githubusercontent.com/69283674/97297629-a1e0f380-1895-11eb-89f3-acc70aa3a30c.png)
 
 배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
