@@ -572,6 +572,7 @@ public class PolicyHandler{
 # API 게이트웨이
 Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정
 -  Gateway 설정 파일 
+
 ![image](https://user-images.githubusercontent.com/69283674/97270866-279f7780-1873-11eb-958f-90ed7d0eec47.png)
 
 
@@ -581,9 +582,12 @@ Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 
 
 각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 AZURE를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 azure-pipelines.yml 에 포함되었다.
 
-![image](https://user-images.githubusercontent.com/36434874/81782632-17017c00-9535-11ea-9562-9750c1bfd24e.png)
+-  아래와 같이 pod 가 정상적으로 올라간 것을 확인하였다. 
+![image](https://user-images.githubusercontent.com/69283674/97273735-10628900-1877-11eb-9f62-2d5fccea4c13.png)
 
-![image](https://user-images.githubusercontent.com/36434874/81782849-65af1600-9535-11ea-8c64-41e6a80ada77.png)
+-  아래와 같이 쿠버네티스에 모두 서비스로 등록된 것을 확인할 수 있다. 
+![image](https://user-images.githubusercontent.com/69283674/97273520-d6918280-1876-11eb-8530-1447d2000735.png)
+
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
 
