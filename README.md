@@ -632,15 +632,20 @@ hystrix:
 
 - 결제서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
 ```
-kubectl autoscale deploy paymentmanagement --min=1 --max=10 --cpu-percent=15
+kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
 ```
-- CB 에서 했던 방식대로 워크로드를 2분 동안 걸어준다.
+
+- 결제서비스의 deployment.yaml의 spec에 아래와 같ㅇ 자원속성을 설정한다:
+![image](https://user-images.githubusercontent.com/69283674/97291666-8f62bc00-188d-11eb-9594-c14a11328bb0.png)
+
+- CB 에서 했던 방식대로 워크로드를 1분 동안 걸어준다.
 ```
-siege -c100 -t120S -r10 --content-type "application/json" 'http://paymentmanagement:8080/payments POST {"reservationStatus": "reserve"}'
+siege -c10 -t60S --v -content-type "application/json" 'http://payment:8080/payments POST {"reservationStatus": "payment"}'
+
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
 ```
-kubectl get deploy pay -w
+kubectl get deploy payment -w
 ```
 
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
