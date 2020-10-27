@@ -159,6 +159,14 @@ spec:
 EOF
  kubectl exec -it httpie bin/bash
 ==========================================================
+
+==========================================================
+*시즈 설치
+apt-get update -y
+apt-get install -y siege
+==========================================================
+
+
 <시나리오>
 --객실등록
 http POST http://room:8080/rooms roomType="SWEET" roomStatus="EMPTY" roomName="SweetRoom" roomQty=10 roomPrice=60000
