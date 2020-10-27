@@ -1,28 +1,36 @@
---객실등록
-http POST http://roommanagement:8080/roomManagements roomStatus="first"
--- 객실 등록시 roomStatus를 firts로 해주세요
-http http://roominfo:8080/roomInfoes
-
---예약 요청
-http post http://reservationmanagement:8080/reservationManagements  customerName="Lee" customerId=123 reserveStatus="1" roomNumber=1 paymentPrice=50000
-
---결제 요청
-http post http://reservationmanagement:8080/reservationManagements reservationNumber=1 reserveStatus="reserve" customerName="Lee" customerId=123 roomNumber=1 paymentPrice=50001
-
---체크아웃 요청
-http post http://reservationmanagement:8080/reservationManagements reservationNumber=1 reserveStatus="checkOut" customerName="Lee" customerId=123 roomNumber=1 paymentPrice=50002
-
-
-
---결제서비스 일시중단
-kubectl scale deploy paymentmanagement --replicas=0
-
-
 시나리오
 1. 객실등록
 2. 예약요청
 3. 결제요청
 4. 체크아웃
+
+
+<시나리오>
+--객실등록
+http POST http://room:8080/rooms roomType="SWEET" roomStatus="EMPTY" roomName="SweetRoom" roomQty=10 roomPrice=60000
+
+--객실조회
+http http://roomInfo:8080/roomInfoes
+
+--예약 요청
+http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=50000
+
+--결제 요청
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50001
+
+kubectl scale deploy payment --replicas=0
+
+--결제 내역 조회
+http http://payment:8080/payments
+
+--체크아웃 요청
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50002
+
+--체크아웃 후 객실조회
+http http://roomInfo:8080/roomInfoes
+
+--결제서비스 일시중단
+kubectl scale deploy payment --replicas=0
 
 
 -서킷브레이커를 통한 장애격리
