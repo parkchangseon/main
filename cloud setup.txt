@@ -65,11 +65,12 @@ kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootst
 * Lab에 필요한 리소스 내려받기
 mkdir accommodation
 cd accommodation
-git clone https://github.com/accommodationMgt/Gateway.git
 git clone https://github.com/accommodationMgt/Reservation.git
 git clone https://github.com/accommodationMgt/Room.git
 git clone https://github.com/accommodationMgt/Notice.git
 git clone https://github.com/accommodationMgt/Payment.git
+git clone https://github.com/accommodationMgt/RoomInfo.git
+git clone https://github.com/accommodationMgt/Gateway.git
 
 * 마이크로서비스 배포
 -객실(Room) 서비스 
@@ -87,6 +88,8 @@ mvn package -Dmaven.test.skip=true
 -Gateway(Gateway) 서비스 
 cd Gateway
 mvn package -Dmaven.test.skip=true
+cd RoomInfo
+mvn package -Dmaven.test.skip=true
 
 ==========================================================
 *클러스터에 배포 (AZURE)
@@ -95,7 +98,6 @@ mvn package -Dmaven.test.skip=true
 az acr login --name team04acr --expose-token
 * 도커라이징 - Azure 레지스트리에 도커 이미지 푸시하기
 az acr build --registry team04acr --image team04acr.azurecr.io/room:latest .
-
 * 컨테이너라이징-디플로이 생성
 kubectl create deploy room --image=team04acr.azurecr.io/room:latest
 * 컨테이너라이징-서비스 생성
@@ -123,6 +125,14 @@ kubectl expose deploy notice --type="ClusterIP" --port=8080
 az acr build --registry team04acr --image team04acr.azurecr.io/gateway:latest .
 kubectl create deploy gateway --image=team04acr.azurecr.io/gateway:latest
 kubectl expose deploy gateway --type="ClusterIP" --port=8080
+
+mvn clean
+docker build -t team04acr.azurecr.io/gateway:latest .
+az acr build --registry team04acr --image team04acr.azurecr.io/roominfo:latest .
+kubectl create deploy roominfo --image=team04acr.azurecr.io/roominfo:latest
+kubectl expose deploy roominfo --type="ClusterIP" --port=8080
+
+
 
 * 설정파일(YAML)을 통한 Pod 배포 (직접 타이핑)
 kubectl create -f declarative-pod.yaml
