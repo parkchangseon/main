@@ -11,7 +11,6 @@
 3.Container Registry
 레지스트리명:  team04acr
 
-------------------------------------------------
 ==========================================================
 * 클러스터에 배포 (AZURE)
 ==========================================================
@@ -24,9 +23,9 @@ az aks get-credentials --resource-group team4 --name team4-aks
 az aks update -n team4-aks -g team4 --attach-acr team04acr
 
 6. 확인
+--kubectl delete deploy,service --all
 kubectl get all
 kubectl config current-context
---kubectl delete deploy,service --all
 
 ==========================================================
 * 클러스터에 kafka 설치
@@ -57,7 +56,6 @@ kubectl -n kafka exec my-kafka-0 -- /usr/bin/kafka-topics --zookeeper my-kafka-z
 kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-producer --broker-list my-kafka:9092 --topic accommodation
 -[참고]토픽 확인
 kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic accommodation --from-beginning
-kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootstrap-server my-kafka:9092 --topic hotelmanage --from-beginning
 
 ==========================================================
 *코드 패키징
@@ -105,9 +103,6 @@ kubectl expose deploy room --type="ClusterIP" --port=8080
 
 * 서비스 확인
 kubectl get po
-kubectl get deploy
-kubectl get svc
-kubectl get replicaset
 kubectl get all
 
 az acr build --registry team04acr --image team04acr.azurecr.io/reservation:latest .
@@ -136,54 +131,69 @@ az acr build --registry team04acr --image team04acr.azurecr.io/roominfo:latest .
 kubectl create deploy roominfo --image=team04acr.azurecr.io/roominfo:latest
 kubectl expose deploy roominfo --type="ClusterIP" --port=8080
 
+* 새버전으로의 배포 시작
+kubectl set image deploy payment reservation=team04acr.azurecr.io/payment:latest
 
 
 * 설정파일(YAML)을 통한 Pod 배포 (직접 타이핑)
 kubectl create -f declarative-pod.yaml
 kubectl get pods
 
+==========================================================
+httpie 설치
+==========================================================
+cat <<EOF | kubectl apply -f -
+apiVersion: "v1"
+kind: "Pod"
+metadata: 
+  name: httpie
+  labels: 
+    name: httpie
+spec: 
+  containers: 
+    - name: httpie
+      image: clue/httpie
+      command:
+        - sleep
+        - "360000"
+EOF
+ kubectl exec -it httpie bin/bash
+==========================================================
+<시나리오>
+--객실등록
+http POST http://room:8080/rooms roomType="SWEET" roomStatus="EMPTY" roomName="SweetRoom" roomQty=10 roomPrice=60000
 
+--객실조회
+http http://roomInfo:8080/roomInfoes
 
+--예약 요청
+http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=50000
 
+--결제 요청
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50001
 
-=================== 3. dev.Auzre.com에서 Pipeline 생성설정 ===========================================
-dev.azure.com 접속
+kubectl scale deploy payment --replicas=0
 
-1. team4 프로젝트 생성
+--결제 내역 조회
+http http://payment:8080/payments
 
-2.[ Pipeline 초기 세팅]
-- Project Settings > Service Connections 설정
- ㄴ Docker Registry 선택 및  Azure container Registry 선택
- ㄴ Service Connection 명: team4Conn
+--체크아웃 요청
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50002
 
-3.[Pipeline Library생성 -소스의 공통부분 처리를위해 사용] - azurepipeline.yml 파일 확인
-- Pipeline > library
- ㄴ Variable추가: 그룹명 team4vg
-   ㄴcontainerRegistry : team4acr.azurecr.io
-   ㄴcontainerRegistryDockerConnection : team4Conn
-   ㄴenvironment : team4env
+--체크아웃 후 객실조회
+http http://roomInfo:8080/roomInfoes
 
-4.  환경변수 추가 
- ㄴ Pipeline > Environments
-   ㄴ 클러스터 연결 설정 함.
-
-5. [ Pipeline 생성] > 빌드>배포 한번에 수행
--  (github yml) 선택하여 시작함.
--  github 에서 pipeline 생성할 프로젝트를 선택하여 Run
-
-
-
-https://github.com/hotelmanage3/main.git
-
-https://github.com/hotelmanage3/RoomManagement.git
-https://github.com/hotelmanage3/ReservationManagement.git
-https://github.com/hotelmanage3/PaymentManagement.git
-https://github.com/hotelmanage3/gateway.git
+==========================================================
+* POD 중지하기
+kubectl scale deploy payment --replicas=0
+==========================================================
 
 ==========================================================
 -서킷브레이커를 통한 장애격리
-: 
+siege -c10 -t10S -r10 --content-type "application/json" 'http http://payment:8080/payments'
+kubectl get deploy payment -w
 
+==========================================================
 - 스케일아웃
 :
 
@@ -195,60 +205,6 @@ https://github.com/hotelmanage3/gateway.git
 
 - Liveness 를 통한 셀프힐링 
 :
-
-
-
-
- kubectl exec -it httpie bin/bash
-
-==========================================================
-* Azure 레지스트리(ACR)에 도커 이미지 푸시하기
-az acr build --registry team04acr --image team04acr.azurecr.io/[이미지명]:latest .
-
-==========================================================
-
-==========================================================
-*Lab에 필요한 리소스 내려받기
-git clone https://github.com/accommodationMgt/Gateway.git
-git clone https://github.com/accommodationMgt/Reservation.git
-git clone https://github.com/accommodationMgt/Room.git
-git clone https://github.com/accommodationMgt/Notice.git
-git clone https://github.com/accommodationMgt/Payment.git
-
-*마이크로서비스 배포
--객실(Room) 서비스 
-cd Room
-mvn package -Dmaven.test.skip=true
-az acr build --registry (myregistry) --image team04acr.azurecr.io/room:latest .
-kubectl create deploy products --image=team04acr.azurecr.io/room:latest
-kubectl expose deploy products --type="ClusterIP" --port=8080
-
-* 서비스 확인
-kubectl get pods   # pods = pod = po
-kubectl get deployments   # deploy
-kubectl get services    # svc
-kubectl get replicaset    # rs
-kubectl get all
-
-
-* 설정파일(YAML)을 통한 Pod 배포 (직접 타이핑)
-kubectl create -f declarative-pod.yaml
-kubectl get pods
-
-* Siege 
-
-
-* 새버전으로의 배포 시작
-kubectl set image deploy reservation reservation=team04acr.azurecr.io/reservation:latest
-
-/payment/kubernetes& kubetctl apply -f deployment.yml
-
-
-
-
-
-
-
 
 
 
