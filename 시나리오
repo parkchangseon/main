@@ -8,26 +8,36 @@
 <시나리오>
 --객실등록
 http POST http://room:8080/rooms roomType="SWEET" roomStatus="EMPTY" roomName="SweetRoom" roomQty=10 roomPrice=60000
+http POST http://room:8080/rooms roomType="DELUXE" roomStatus="EMPTY" roomName="DELUXERoom" roomQty=5 roomPrice=30000
 
---객실조회
+http http://room:8080/rooms
+
+--객실조회(X)
 http http://roomInfo:8080/roomInfoes
 
 --예약 요청
-http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=50000
+http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=1 paymentPrice=50000
+http post http://reservation:8080/reservations customerName="KIM" customerId=9800 reserveStatus="reserve" roomNumber=11 paymentPrice=30000
+http post http://reservation:8080/reservations customerName="LEE" customerId=9700 reserveStatus="reserve" roomNumber=12 paymentPrice=30000
 
 --결제 요청
 http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50001
+http post http://reservation:8080/reservations reservationNumber=4 reserveStatus="payment" customerName="KIM" customerId=9800 roomNumber=11 paymentPrice=30000
 
 kubectl scale deploy payment --replicas=0
+kubectl scale deploy payment --replicas=1
+http post http://reservation:8080/reservations reservationNumber=5 reserveStatus="payment" customerName="KIM" customerId=9800 roomNumber=12 paymentPrice=30000
+
 
 --결제 내역 조회
 http http://payment:8080/payments
 
 --체크아웃 요청
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50002
+http post http://reservation:8080/reservations reservationNumber=5 reserveStatus="checkOut" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50002
 
 --체크아웃 후 객실조회
 http http://roomInfo:8080/roomInfoes
+http http://room:8080/rooms/5
 
 --결제서비스 일시중단
 kubectl scale deploy payment --replicas=0
