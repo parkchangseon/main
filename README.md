@@ -119,7 +119,8 @@
 
 ## Event Storming 결과
 * MSAEz 로 모델링한 이벤트스토밍 결과: 
-URL 넣기
+https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be89639c5a1c96210c4bb/-MKbLyDZELkpG9pKR7Qa
+
 
 
 ### 이벤트 도출
