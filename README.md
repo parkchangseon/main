@@ -169,8 +169,9 @@ https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be
 ![image](https://user-images.githubusercontent.com/69283674/97153235-81416c80-17b5-11eb-8d93-ab678184e2c7.png)
 
 기능적 요구사항
+
     - 숙박관리자는 객실을 등록할 수 있다 (OK)
-    
+   
     - 고객이 객실을 선택하여 예약한다 (OK)
     
     - 예약이 완료되면 해당 객실은 '예약불가' 상태로 변경된다 (OK)
@@ -182,6 +183,7 @@ https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be
 ![image](https://user-images.githubusercontent.com/69283674/97153635-28260880-17b6-11eb-9e2c-225e1407d31f.png)
 
 기능적 요구사항
+
     - 고객은 예약을 취소할 수 있다 (OK)
     
     - 예약이 취소되면 해당 객실은 '예약가능' 상태로 변경된다 (OK)
@@ -569,7 +571,7 @@ public class PolicyHandler{
 
 # API 게이트웨이
 Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정
-# Gateway 설정 파일 GATEWAY
+-  Gateway 설정 파일 
 ![image](https://user-images.githubusercontent.com/69283674/97270866-279f7780-1873-11eb-958f-90ed7d0eec47.png)
 
 
