@@ -394,7 +394,7 @@ http post http://ReservationManagement:8080/reservationManagements reservationNu
 ```
 #객실등록
 http post localhost:8083/roomManagements roomStatus="first"
-
+http http://RoomManagement:8080/roomManagements roomStatus="first"
 #예약요청 (객실이 있을경우)
 http post http://ReservationManagement:8080/reservationManagements  customerName="Lee" customerId=123 reserveStatus="1" roomNumber=1 paymentPrice=50000
 
