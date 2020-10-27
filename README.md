@@ -634,13 +634,15 @@ hystrix:
 ```
 kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
 ```
+![image](https://user-images.githubusercontent.com/69283674/97295328-7b6d8900-1892-11eb-9581-f40d9b09b5de.png)
 
-- 결제서비스의 deployment.yaml의 spec에 아래와 같ㅇ 자원속성을 설정한다:
+
+- 결제서비스의 deployment.yaml의 spec에 아래와 같이 자원속성을 설정한다:
 ![image](https://user-images.githubusercontent.com/69283674/97291666-8f62bc00-188d-11eb-9594-c14a11328bb0.png)
 
 - CB 에서 했던 방식대로 워크로드를 1분 동안 걸어준다.
 ```
-siege -c10 -t60S --v -content-type "application/json" 'http://payment:8080/payments POST {"reservationStatus": "payment"}'
+siege -c100 -t60S -content-type "application/json" 'http://payment:8080/payments'
 
 ```
 - 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
@@ -650,35 +652,5 @@ kubectl get deploy payment -w
 
 - siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
 
-
-__As-IS__
-```
-Transactions:                    642 hits
-Availability:                  51.16 %
-Elapsed time:                  48.78 secs
-Data transferred:               0.68 MB
-Response time:                  4.39 secs
-Transaction rate:              13.16 trans/sec
-Throughput:                     0.01 MB/sec
-Concurrency:                   57.80
-Successful transactions:         642
-Failed transactions:             613
-Longest transaction:            8.91
-Shortest transaction:           0.00
-```
-__TO-BE__
-```
-Transactions:                   2293 hits
-Availability:                  99.78 %
-Elapsed time:                 119.58 secs
-Data transferred:               0.70 MB
-Response time:                  4.58 secs
-Transaction rate:              19.18 trans/sec
-Throughput:                     0.01 MB/sec
-Concurrency:                   87.80
-Successful transactions:        2293
-Failed transactions:               5
-Longest transaction:           15.44
-Shortest transaction:           0.45
-```
+![image](https://user-images.githubusercontent.com/69283674/97295982-5fb6b280-1893-11eb-89ef-741b220b2201.png)
 
