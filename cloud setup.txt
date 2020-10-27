@@ -122,12 +122,16 @@ az acr build --registry team04acr --image team04acr.azurecr.io/notice:latest .
 kubectl create deploy notice --image=team04acr.azurecr.io/notice:latest
 kubectl expose deploy notice --type="ClusterIP" --port=8080
 
+mvn clean
+docker build -t team04acr.azurecr.io/gateway:latest .
 az acr build --registry team04acr --image team04acr.azurecr.io/gateway:latest .
 kubectl create deploy gateway --image=team04acr.azurecr.io/gateway:latest
 kubectl expose deploy gateway --type="ClusterIP" --port=8080
 
-mvn clean
-docker build -t team04acr.azurecr.io/gateway:latest .
+az acr build --registry team04acr --image team04acr.azurecr.io/room:latest .
+kubectl create deploy room --image=team04acr.azurecr.io/room:latest
+kubectl expose deploy room --type="ClusterIP" --port=8080
+
 az acr build --registry team04acr --image team04acr.azurecr.io/roominfo:latest .
 kubectl create deploy roominfo --image=team04acr.azurecr.io/roominfo:latest
 kubectl expose deploy roominfo --type="ClusterIP" --port=8080
