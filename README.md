@@ -246,37 +246,34 @@ mvn spring-boot:run
 - 각 서비스내에 도출된 핵심 Aggregate Root 객체를 Entity 로 선언하였다: (예시는 pay 마이크로 서비스). 이때 가능한 현업에서 사용하는 언어 (유비쿼터스 랭귀지)를 그대로 사용하려고 노력했다. 하지만, 일부 구현에 있어서 영문이 아닌 경우는 실행이 불가능한 경우가 있기 때문에 계속 사용할 방법은 아닌것 같다. (Maven pom.xml, Kafka의 topic id, FeignClient 의 서비스 id 등은 한글로 식별자를 사용하는 경우 오류가 발생하는 것을 확인하였다)
 
 ```
-package hotelmanage;
+package accommodation;
 
 import javax.persistence.*;
 
+import accommodation.external.Payment;
+import accommodation.external.PaymentManagementService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import hotelmanage.config.kafka.KafkaProcessor;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cloud.stream.messaging.Processor;
+import accommodation.config.kafka.KafkaProcessor;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessageHeaders;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.util.MimeTypeUtils;
 
-import java.util.List;
-
 @Entity
-@Table(name="ReservationManagement_table")
-public class ReservationManagement {
+@Table(name="Reservation_table")
+public class Reservation {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private Integer reservationNumber;
-    private String customerName;
-    private Integer customerId;
-    private String reserveStatus;
     private Integer roomNumber;
+    private Integer customerId;
+    private String customerName;
+    private String reserveStatus;
     private Integer PaymentPrice;
-    
-   public Integer getReservationNumber() {
+
+    public Integer getReservationNumber() {
         return reservationNumber;
     }
 
@@ -320,14 +317,17 @@ public class ReservationManagement {
         PaymentPrice = paymentPrice;
     }
 
+
+}
+
 ```
 - Entity Pattern 과 Repository Pattern 을 적용하여 JPA 를 통하여 다양한 데이터소스 유형 (RDB or NoSQL) 별도의 처리가 없도록 데이터 접근 어댑터를 자동 생성하기 위하여 Spring Data REST 의 RestRepository 를 적용하였다
 ```
-package hotelmanage;
+package accommodation;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface ReservationManagementRepository extends PagingAndSortingRepository<ReservationManagement, Integer>{
+public interface ReservationRepository extends PagingAndSortingRepository<Reservation, Integer>{
 
 }
 ```
@@ -335,14 +335,14 @@ public interface ReservationManagementRepository extends PagingAndSortingReposit
 ```
 
 
-#  RoomManagement 서비스의 객실정보처리
-http post localhost:8083/roomManagements roomStatus="first"
+#  Room 서비스의 객실정보처리
+http post http://room:8080/rooms roomType="SWEET" roomStatus="EMPTY" roomName="SweetRoom" roomQty=10 roomPrice=60000
 
-#  ReservationManagement 서비스의 예약처리
-http post localhost:8081/reservationManagements  customerName="Lee" customerId=123 reserveStatus="1" roomNumber=1 paymentPrice=50000
+#  Reservation 서비스의 예약처리
+http post http://reservation:8080/reservations customerId=9805 customerName="PARK" roomNumber=1 reserveStatus="reserve" paymentPrice=50000
 
 # 예약 상태 확인
-http post localhost:8084/rommInfos
+http http://roomInfo:8080/roomInfoes
 
 ```
 
@@ -356,8 +356,7 @@ http post localhost:8084/rommInfos
 
 ```
 # (payment) PaymentManagementService.java
-
-package hotelmanage.external;
+package accommodation.external;
 
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
@@ -374,35 +373,41 @@ public interface PaymentManagementService {
 
 - 결제 요청 시 동기적으로 실행
 ```
-# ReservationManagement.java (Entity)
+# Reservation.java (Entity)
 
     @PreUpdate
     public void onPreUpdate(){
         ...
-        Application.applicationContext.getBean(hotelmanage.external.PaymentManagementService.class).CompletePayment(payment);
+            Payment payment = new Payment();
+            payment.setPaymentPrice(getPaymentPrice());
+            payment.setReservationNumber(getReservationNumber());
+            payment.setReservationStatus(getReserveStatus()); 
+            
+            Application.applicationContext.getBean(PaymentManagementService.class).CompletePayment(payment);
+          
     }
 ```
 
 - 동기식으로 결제 요청시 결제 시스템 장애의 경우 예약 불가 확인 :
 ```
 #결제요청
-http post http://ReservationManagement:8080/reservationManagements reservationNumber=1 reserveStatus="reserve" customerName="Lee" customerId=123 roomNumber=1 paymentPrice=50001
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=1 paymentPrice=50001
 
 ```
 
 
 ```
 #객실등록
-http post localhost:8083/roomManagements roomStatus="first"
-http http://RoomManagement:8080/roomManagements roomStatus="first"
+http post http://room:8080/rooms roomType="SWEET" roomStatus="EMPTY" roomName="SweetRoom" roomQty=10 roomPrice=60000
+
 #예약요청 (객실이 있을경우)
-http post http://ReservationManagement:8080/reservationManagements  customerName="Lee" customerId=123 reserveStatus="1" roomNumber=1 paymentPrice=50000
+http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=1 paymentPrice=60000
 
 #결제요청
-http post http://ReservationManagement:8080/reservationManagements reservationNumber=1 reserveStatus="reserve" customerName="Lee" customerId=123 roomNumber=1 paymentPrice=50001
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=1 paymentPrice=60000
 
 #Check Out
-http post http://ReservationManagement:8080/reservationManagements reservationNumber=1 reserveStatus="checkOut" customerName="Lee" customerId=123 roomNumber=1 paymentPrice=50001
+http post http://reservation:8080/reservations reservationNumber=5 reserveStatus="checkOut" customerName="PARK" customerId=9805 roomNumber=1 paymentPrice=60000
 ```
 
 
@@ -414,11 +419,11 @@ http post http://ReservationManagement:8080/reservationManagements reservationNu
 - 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
-package hotelmanage;
+package accommodation;
 
 @Entity
-@Table(name="ReservationManagement_table")
-public class ReservationManagement {
+@Table(name="Reservation_table")
+public class Reservation  {
 
  ...
     @PrePersist
@@ -433,7 +438,7 @@ public class ReservationManagement {
         reserved.setPaymentPrice(this.getPaymentPrice());
 
         reserved.publishAfterCommit();
-    }
+    }    
 ```
 - 예약 서비스에서 해당 비동기 호출을 수신할 PolicyHandler를 구현
 
@@ -446,8 +451,8 @@ package hotelmanage;
 public class PolicyHandler{
 
     @Autowired
-    ReservationManagementRepository reservationManagementrepository;
-
+    ReservationRepository reservationManagementrepository;
+    
     @StreamListener(KafkaProcessor.INPUT)
     public void wheneverPaymentCompleted_ChangeResvStatus(@Payload PaymentCompleted paymentcompleted){
         System.out.println(paymentcompleted.toJson());
@@ -455,13 +460,11 @@ public class PolicyHandler{
             System.out.println("====================================결제완료 1차====================================");
             if(reservationManagementrepository.findById(paymentcompleted.getReservationNumber()) != null){
                 System.out.println("====================================결제완료====================================");
-                ReservationManagement reservationManagement = reservationManagementrepository.findById(paymentcompleted.getReservationNumber()).get();
+                Reservation reservationManagement = reservationManagementrepository.findById(paymentcompleted.getReservationNumber()).get();
                 reservationManagement.setReserveStatus("paymentComp");
                 reservationManagementrepository.save(reservationManagement);
             }
-
         }
-
     }
 
 }
@@ -471,22 +474,24 @@ public class PolicyHandler{
 객실 시스템은 예약/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 객실시스템이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다:
 ```
 # 객실 서비스 (room) 를 잠시 내려놓음 (ctrl+c)
+kubectl scale deploy room --replicas=0
 
-#예약처리
-http post localhost:8081/reservationManagements  customerName="Lee" customerId=123 reserveStatus="1" roomNumber=1 paymentPrice=50000
+#예약 및 결제처리
+http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=1 paymentPrice=50000
    #Success
-http post localhost:8081/reservationManagements  customerName="Lee" customerId=123 reserveStatus="1" roomNumber=1 paymentPrice=50000
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50001
    #Success
 
 #객실상태 확인
-http localhost:8084/roomInfos     # 객실 안바뀜 확인
+http http://roomInfo:8080/roomInfoes     # 객실 상태 안바뀜 확인
 
 #객실 서비스 기동
-cd RoomManagement
-mvn spring-boot:run
+--cd RoomManagement
+--mvn spring-boot:run
+kubectl scale deploy room --replicas=1
 
 #객실상태 확인
-http localhost:8084/roomInfos     # 모든 주문의 상태가 "배송됨"으로 확인
+http localhost:8084/roomInfos     # 객실의 상태가 "Notavailable"으로 확인
 ```
 
 ## CQRS 패턴 
@@ -495,28 +500,41 @@ http localhost:8084/roomInfos     # 모든 주문의 상태가 "배송됨"으로
 - 모든 정보는 비동기 방식으로 호출한다.
 
 ```
-RoomManagement.java(Entity)
+Room.java(Entity)
 
 @Entity
-@Table(name="RoomManagement_table")
-public class RoomManagement {
+@Table(name="Room_table")
+public class Room {
     ...
 
     @PostPersist
     public void onPostPersist(){
         RoomConditionChanged roomConditionChanged = new RoomConditionChanged();
-        roomConditionChanged.setRoomNumber(this.getRoomNumber());
+        roomConditionChanged.setRoomNo(this.getRoomNo());
+        roomConditionChanged.setRoomType(this.getRoomType());
         roomConditionChanged.setRoomStatus(this.getRoomStatus());
+        roomConditionChanged.setRoomName(this.getRoomName());
+        roomConditionChanged.setRoomQty(this.getRoomQty());
+        roomConditionChanged.setRoomPrice(this.getRoomPrice());
+
         BeanUtils.copyProperties(this, roomConditionChanged);
+
         roomConditionChanged.publishAfterCommit();
     }
     @PostUpdate
     public void onPostUpdate(){
-            RoomConditionChanged roomConditionChanged = new RoomConditionChanged();
-            roomConditionChanged.setRoomNumber(this.getRoomNumber());
-            roomConditionChanged.setRoomStatus(this.getRoomStatus());
-            BeanUtils.copyProperties(this, roomConditionChanged);
-            roomConditionChanged.publishAfterCommit();
+        System.out.println("예약가능?:"+this.roomStatus);
+        RoomConditionChanged roomConditionChanged = new RoomConditionChanged();
+        roomConditionChanged.setRoomNo(this.getRoomNo());
+        roomConditionChanged.setRoomType(this.getRoomType());
+        roomConditionChanged.setRoomStatus(this.getRoomStatus());
+        roomConditionChanged.setRoomName(this.getRoomName());
+        roomConditionChanged.setRoomQty(this.getRoomQty());
+        roomConditionChanged.setRoomPrice(this.getRoomPrice());
+
+        BeanUtils.copyProperties(this, roomConditionChanged);
+        roomConditionChanged.publishAfterCommit();
+        System.out.println("예약가능으로 변경");
     }
 ```
 - RoomInfo에 저장하는 서비스 정책 (PolicyHandler)구현
@@ -531,18 +549,29 @@ public class PolicyHandler{
 
     @StreamListener(KafkaProcessor.INPUT)
     public void wheneverSave_RoomInfo(@Payload RoomConditionChanged roomConditionChanged){
-
         if(roomConditionChanged.isMe()){
             System.out.println("##### listener 객실정보저장 : " + roomConditionChanged.toJson());
-                RoomInfo roomInfo = new RoomInfo();
-                roomInfo.setRoomNumber(roomConditionChanged.getRoomNumber());
-                roomInfo.setRoomStatus(roomConditionChanged.getRoomStatus());
-                roomInfoRepository.save(roomInfo);
+            RoomInfo roomInfo = new RoomInfo();
+            roomInfo.setRoomNumber(roomConditionChanged.getRoomNumber());
+            roomInfo.setRoomName(roomConditionChanged.getRoomName());
+            roomInfo.setRoomStatus(roomConditionChanged.getRoomStatus());
+            roomInfo.setRoomPrice(roomConditionChanged.getRoomPrice());
+            roomInfo.setRoomQty(roomConditionChanged.getRoomQty());
+            roomInfo.setRoomStatus(roomConditionChanged.getRoomStatus());
+            roomInfo.setRoomType(roomConditionChanged.getRoomType());
+
+            roomInfoRepository.save(roomInfo);
         }
     }
 }
 
 ```
+
+# API 게이트웨이
+Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정
+# Gateway 설정 파일 GATEWAY
+![image](https://user-images.githubusercontent.com/69283674/97270866-279f7780-1873-11eb-958f-90ed7d0eec47.png)
+
 
 # 운영
 
