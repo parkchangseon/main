@@ -24,27 +24,20 @@
 # 서비스 시나리오
 
 기능적 요구사항
-1. 숙박관리자는 객실을 등록할 수 있다
-2. 고객이 객실을 선택하여 예약한다.
-3. 예약이 완료되면 해당 객실은 '예약불가' 상태로 변경된다.
-4. 결제가 완료되면 객실 예약이 확정된다.
-5. 고객이 예약을 취소할 수 있다.
-6. 숙박관리자가 객실을 체크아웃 하면 객실은 예약가능 상태로 변경된다.
-7. 고객이 숙소 예약상태를 중간중간 조회한다.
-8. 예약상태가 바뀔 때 마다 카톡으로 알림을 보낸다
+. 고객의 결제 금액에 따라 할인쿠폰, 음료수와 같은 서비스 또는 쿠폰을 제공한다.
 
 비기능적 요구사항
 1. 트랜잭션
 
-    i. 결제가 되지 않은 예약건은 아예 예약이 완료되지 않아야 한다  Sync 호출 
+    i. 결제가 되지 않은 건은 프로모션이 제공되지 않는다. Sync 호출 
 2. 장애격리
 
-    i. 객실관리시스템이 수행되지 않더라도 객실 예약은 365일 24시간 받을 수 있어야 한다  Async (event-driven), Eventual Consistency
+    i. 객실관리시스템이 수행되지 않더라도 프로모션은 365일 24시간 제공되어야 한다.  Async (event-driven), Eventual Consistency
     
-    ii. 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도한다  Circuit breaker, fallback
+    ii. 프로모션시스템이 과중되면 사용자를 잠시동안 받지 않고 프로모션을 잠시후에 하도록 유도한다  Circuit breaker, fallback
 3. 성능
 
-    i. 고객이 객실상태를 예약시스템(프론트엔드)에서 확인할 수 있어야 한다  CQRS    
+    i. 고객이 프로모션 상태를 예약시스템(프론트엔드)에서 확인할 수 있어야 한다  CQRS    
     
     ii. 객실상태가 바뀔때마다 카톡 등으로 알림을 줄 수 있어야 한다 Event driven
 
@@ -123,26 +116,6 @@
 * MSAEz 로 모델링한 이벤트스토밍 결과: 
 https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be89639c5a1c96210c4bb/-MKbLyDZELkpG9pKR7Qa
 
-
-
-### 이벤트 도출
-![image](https://user-images.githubusercontent.com/69283674/97150926-307c4480-17b2-11eb-8c70-251530e0d9fd.png)
-    
-### 부적격 이벤트 탈락
-![image](https://user-images.githubusercontent.com/69283674/97151026-4ee24000-17b2-11eb-8b90-2e035743d335.png)
-
-    - 과정중 도출된 잘못된 도메인 이벤트들을 걸러내는 작업을 수행함
-        - 결재시>결재버튼이 클릭됨  : UI 의 이벤트이지, 업무적인 의미의 이벤트가 아니라서 제외
-
-### 액터 및 커맨드 부착하여 읽기 좋게
-
-![image](https://user-images.githubusercontent.com/69283674/97151489-e8a9ed00-17b2-11eb-879d-75de8f6a129b.png)
-
-
-### 어그리게잇으로 묶기
-
-![image](https://user-images.githubusercontent.com/69283674/97152033-af25b180-17b3-11eb-91dd-cfe3e514cfd6.png)
-
 ### 바운디드 컨텍스트로 묶기
 
 ![image](https://user-images.githubusercontent.com/69283674/97152594-79cd9380-17b4-11eb-9bbe-5e0f02421917.png)
@@ -172,63 +145,37 @@ https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be
 
 기능적 요구사항
 
-    - 숙박관리자는 객실을 등록할 수 있다 (OK)
+    - 고객의 결제금액에 따라 프로모션이 제공된다. (OK)
    
-    - 고객이 객실을 선택하여 예약한다 (OK)
-    
-    - 예약이 완료되면 해당 객실은 '예약불가' 상태로 변경된다 (OK)
-    
-    - 결제가 완료되면 예약이 확정된다 (OK)
-
-### 기능적 요구사항을 커버하는지 검증(2)
-
-![image](https://user-images.githubusercontent.com/69283674/97153635-28260880-17b6-11eb-9e2c-225e1407d31f.png)
-
-기능적 요구사항
-
-    - 고객은 예약을 취소할 수 있다 (OK)
-    
-    - 예약이 취소되면 해당 객실은 '예약가능' 상태로 변경된다 (OK)
-    
-    - 고객이 숙소 예약상태를 중간중간 조회한다 (OK)
-    
-    - 예약상태가 바뀔때마다 알람을 보낸다 (OK)
-
+    - 고객은 언제든지 본인의 프로모션 상태를 확인할 수 있다. (OK)
 
 ### 비기능 요구사항에 대한 검증
 
 ![image](https://user-images.githubusercontent.com/69283674/97153970-ada9b880-17b6-11eb-877b-95b4f9813a7d.png)
 
 1. 트랜잭션
- - 결제가 되지 않은 예약건은 아예 예약이 완료되지 않아야 한다 Sync 호출
+ - 결제가 되지 않은 건은 프로모션이 제공되지 않아야 한다 Sync 호출
  -> 예약 시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 예약완료시 결제처리에 대해서는 Request-Response 방식 처리
  
 2. 장애격리
- - 객실관리시스템이 수행되지 않더라도 객실 예약은 365일 24시간 받을 수 있어야 한다 Async (event-driven), Eventual Consistency
- -> 결제 완료시 객실연결 및 확정처리:  App(front) 에서 Room 마이크로서비스로 예약요청이 전달되는 과정에 있어서 Room 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
- - 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 결제를 잠시후에 하도록 유도한다 Circuit breaker, fallback
+ - 객실관리시스템이 수행되지 않더라도 프로모션은 365일 24시간 제공될 수 있어야 한다 Async (event-driven), Eventual Consistency
+ -> 결제 완료시 프로모션연결 및 확정처리:  App(front) 에서 Room 마이크로서비스로 예약요청이 전달되는 과정에 있어서 Room 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
+ - 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 프로모션을 잠시후에 하도록 유도한다 Circuit breaker, fallback
  
 3. 성능
- - 고객이 객실상태를 수신하여 예약시스템(프론트엔드)에서 확인할 수 있어야 한다 CQRS
+ - 고객이 프로모션을 언제든지 예약시스템(프론트엔드)에서 확인할 수 있어야 한다 CQRS
  - 예약상태가 바뀔때마다 카톡 등으로 알림을 줄 수 있어야 한다 Event driven
  -> 나머지 모든 inter-microservice 트랜잭션: 예약상태, 결제상태 등 모든 이벤트에 대해 카톡을 처리하는 등, 데이터 일관성의 시점이 크리티컬하지 않은 모든 경우가 대부분이라 판단, Eventual Consistency 를 기본으로 채택함.
 
-
-
-## 헥사고날 아키텍처 다이어그램 도출
-    
-![image](https://user-images.githubusercontent.com/69283674/97154475-40e2ee00-17b7-11eb-9bd6-1d19a6f9e157.png)
-
-    - Inbound adaptor와 Outbound adaptor를 구분함
-    - 호출관계에서 PubSub 과 Req/Resp 를 구분함
-    - 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
-    
 
 # 구현:
 
 분석/설계 단계에서 도출된 헥사고날 아키텍처에 따라, 각 BC별로 대변되는 마이크로 서비스들을 스프링부트로 구현하였다. 구현한 각 서비스를 로컬에서 실행하는 방법은 아래와 같다 (각자의 포트넘버는 8081 ~ 808n 이다)
 
 ```
+cd Promotion
+mvn spring-boot:run
+
 cd Reservation
 mvn spring-boot:run
 
@@ -251,53 +198,98 @@ mvn spring-boot:run
 
 ```
 package accommodation;
-
 import javax.persistence.*;
-
-import accommodation.external.Payment;
-import accommodation.external.PaymentManagementService;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import accommodation.config.kafka.KafkaProcessor;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.MessageHeaders;
-import org.springframework.messaging.support.MessageBuilder;
-import org.springframework.util.MimeTypeUtils;
+import org.springframework.beans.BeanUtils;
 
 @Entity
-@Table(name="Reservation_table")
-public class Reservation {
+@Table(name="Promotion_table")
+public class Promotion {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
-    private Integer reservationNumber;
-    private Integer roomNumber;
-    private Integer customerId;
-    private String customerName;
+    private int couponId;
+    private int paymentId;
+    private int paymentPrice;
+    private String paymentStatus;
+    private int point;
     private String reserveStatus;
-    private Integer PaymentPrice;
+    private String service;
 
-    public Integer getReservationNumber() {
-        return reservationNumber;
+    @PrePersist
+    public void onPrePersist() {
+        if ("promotion".equals(reserveStatus) ) {
+            System.out.println("=============마일리지 적립 처리중=============");
+            setReserveStatus("promotion");
+            PromotionSaved couponSaved = new PromotionSaved();
+
+            couponSaved.setPaymentId(paymentId);
+            couponSaved.setPaymentPrice(paymentPrice);
+            couponSaved.setPaymentStatus(paymentStatus);
+
+            if("Y".equals(paymentStatus)) {
+                if (paymentPrice >= 100000) {
+                    service = "DISCOUNT COUPON";
+                } else if (paymentPrice >= 50000 && paymentPrice < 100000) {
+                    service = "BEVERAGE";
+                } else {
+                    point = paymentPrice / 10;
+                }
+            } else {
+                point = 0;
+            }
+            BeanUtils.copyProperties(this, couponSaved);
+
+            couponSaved.publishAfterCommit();
+
+            try {
+                Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+                System.out.println("=============마일리지 적립 완료=============");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
-    public void setReservationNumber(Integer reservationNumber) {
-        this.reservationNumber = reservationNumber;
-    }
-    public String getCustomerName() {
-        return customerName;
+    public int getCouponId() {
+        return couponId;
     }
 
-    public void setCustomerName(String customerName) {
-        this.customerName = customerName;
-    }
-    public Integer getCustomerId() {
-        return customerId;
+    public void setCouponId(int CouponId) {
+        this.couponId = couponId;
     }
 
-    public void setCustomerId(Integer customerId) {
-        this.customerId = customerId;
+    public int getPaymentId() {
+        return paymentId;
     }
+
+    public void setPaymentId(int paymentId) {
+        this.paymentId = paymentId;
+    }
+
+    public int getPaymentPrice() {
+        return paymentPrice;
+    }
+
+    public void setPaymentPrice(int paymentPrice) {
+        this.paymentPrice = paymentPrice;
+    }
+
+    public String getPaymentStatus() {
+        return paymentStatus;
+    }
+
+    public void setPaymentStatus(String paymentStatus) {
+        this.paymentStatus = paymentStatus;
+    }
+
+    public int getPoint() {
+        return point;
+    }
+
+    public void setPoint(int point) {
+        this.point = point;
+    }
+
     public String getReserveStatus() {
         return reserveStatus;
     }
@@ -305,23 +297,14 @@ public class Reservation {
     public void setReserveStatus(String reserveStatus) {
         this.reserveStatus = reserveStatus;
     }
-    public Integer getRoomNumber() {
-        return roomNumber;
+
+    public String getService() {
+        return service;
     }
 
-    public void setRoomNumber(Integer roomNumber) {
-        this.roomNumber = roomNumber;
+    public void setService(String service) {
+        this.service = service;
     }
-
-    public Integer getPaymentPrice() {
-        return PaymentPrice;
-    }
-
-    public void setPaymentPrice(Integer paymentPrice) {
-        PaymentPrice = paymentPrice;
-    }
-
-
 }
 
 ```
@@ -331,42 +314,24 @@ package accommodation;
 
 import org.springframework.data.repository.PagingAndSortingRepository;
 
-public interface ReservationRepository extends PagingAndSortingRepository<Reservation, Integer>{
-
+public interface PromotionRepository extends PagingAndSortingRepository<Promotion, Long> {
 }
 ```
 - 적용 후 REST API 의 테스트
 ```
-#객실등록
-http POST http://room:8080/rooms roomType="DERUX" roomStatus="EMPTY" roomName="DERUX ROOM" roomQty=10 roomPrice=1200000\
+#결제 및 프로모션 등록
+http post http://promotion:8080/promotions paymentId=1 paymentPrice=100000 paymentStatus="Y" reserveStatus="promotion"
+http post http://promotion:8080/promotions paymentId=2 paymentPrice=60000 paymentStatus="Y" reserveStatus="promotion"
+http post http://promotion:8080/promotions paymentId=3 paymentPrice=10000 paymentStatus="Y" reserveStatus="promotion"
 
-#객실 조회
-http http://roomInfo:8080/roomInfoes 
-
-#예약요청 (객실이 있을경우)
-http post http://reservation:8080/reservations customerName="PARK CHANG SEON" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=120000
-
-#결제요청
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
-
-#결제 내역 조회
-http http://payment:8080/payments
-
-#Check Out
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
+#프로모션 조회
+http http://roomInfo:8080/roomInfoes
 ```
 
 ![image](https://user-images.githubusercontent.com/69283674/97377996-9ed11c00-1904-11eb-9705-b81ec3e7399e.png)
 
 ![image](https://user-images.githubusercontent.com/69283674/97378172-199a3700-1905-11eb-9e97-5450b00e37df.png)
 
-![image](https://user-images.githubusercontent.com/69283674/97378209-2ae34380-1905-11eb-9af7-f428c2c0ac81.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378300-667e0d80-1905-11eb-816a-fdd22398372b.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378332-7ac20a80-1905-11eb-85f2-be38ba7003f3.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378372-90cfcb00-1905-11eb-9707-88259c10d5a3.png)
 
 
 
