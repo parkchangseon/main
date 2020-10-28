@@ -334,7 +334,7 @@ public interface PaymentManagementService {
           
     }
 ```
-![프로모션적립동기호출](https://user-images.githubusercontent.com/69283816/97467563-adace280-1987-11eb-8668-bb9f977fc399.png)
+![프로모션적립동기호출](https://user-images.githubusercontent.com/69283816/97468638-dd101f00-1988-11eb-918a-3a0f0f5b5342.png)
 ![프로모션확인동기호출](https://user-images.githubusercontent.com/69283816/97467722-d3d28280-1987-11eb-8318-2e8fa924bc31.png)
 
 - 동기식으로 프로모션 요청시 결제 시스템 장애의 경우 프로모션 불가 확인 :
@@ -472,7 +472,6 @@ public class Promotion {
         }
     }
 ```
-
 - RoomInfo에 저장하는 서비스 정책 (PolicyHandler)구현
 ```
 PolicyHandler.java
@@ -503,8 +502,6 @@ public class PolicyHandler{
         }
     }
 }
-
-
 
 ```
 # API 게이트웨이
