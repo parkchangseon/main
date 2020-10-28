@@ -657,6 +657,8 @@ public class PolicyHandler{
             roomInfo.setReservationStatus(reserved.getReserveStatus());
             roomInfo.setRoomNo(reserved.getRoomNo());
             roomInfo.setReservePrice(reserved.getReservePrice());
+            
+            roomInfoRepository.save(roomInfo);
         }
     }    
 
@@ -686,6 +688,8 @@ public class PolicyHandler{
             roomInfo.setCustomerId(checkedOut.getCustomerId());
             roomInfo.setCustomerName(checkedOut.getCustomerName());
             roomInfo.setReservationStatus(checkedOut.getReserveStatus());
+            
+            roomInfoRepository.save(roomInfo);
         }
     }
 }
