@@ -143,6 +143,9 @@ az acr build --registry team04acrpark --image team04acrpark.azurecr.io/gateway:l
 kubectl create deploy gateway --image=team04acrpark.azurecr.io/gateway:latest
 kubectl expose deploy gateway --type="ClusterIP" --port=8080
 
+-- httpie 실행
+kubectl exec -it httpie bin/bash 
+
 --------------------------------------------------------------------------------------------------------------------------------
 * 새버전으로의 배포 시작
 mvn package -Dmaven.test.skip=true
@@ -150,7 +153,6 @@ az acr build --registry team04acr --image team04acr.azurecr.io/room:latest .
 kubectl set image deploy room room=team04acr.azurecr.io/room:latest
 
 siege -c100 -t10S -v --content-type "application/json" 'http://room:8080/rooms POST {"roomStatus": "EMPTY", "roomName":"DERUX"}'
-
 
 
 * 설정파일(YAML)을 통한 Pod 배포 (직접 타이핑)
