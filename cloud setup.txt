@@ -63,12 +63,6 @@ kubectl -n kafka exec -ti my-kafka-0 -- /usr/bin/kafka-console-consumer --bootst
 * Lab에 필요한 리소스 내려받기
 mkdir accommodation
 cd accommodation
-git clone https://github.com/accommodationMgt/Reservation.git
-git clone https://github.com/accommodationMgt/Room.git
-git clone https://github.com/accommodationMgt/Notice.git
-git clone https://github.com/accommodationMgt/Payment.git
-git clone https://github.com/accommodationMgt/RoomInfo.git
-git clone https://github.com/accommodationMgt/Gateway.git
 
 git clone https://github.com/parkchangseon/Notice.git
 git clone https://github.com/parkchangseon/main.git
@@ -77,6 +71,7 @@ git clone https://github.com/parkchangseon/Room.git
 git clone https://github.com/parkchangseon/Reservation.git
 git clone https://github.com/parkchangseon/Payment.git
 git clone https://github.com/parkchangseon/Gateway.git
+git clone https://github.com/parkchangseon/Promotion.git
 
 
 * 마이크로서비스 배포
@@ -96,6 +91,8 @@ mvn package -Dmaven.test.skip=true
 cd Gateway
 mvn package -Dmaven.test.skip=true
 cd RoomInfo
+mvn package -Dmaven.test.skip=true
+cd Promotion
 mvn package -Dmaven.test.skip=true
 
 ==========================================================
