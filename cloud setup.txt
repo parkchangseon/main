@@ -131,8 +131,14 @@ az acr build --registry team04acr --image team04acr.azurecr.io/roominfo:latest .
 kubectl create deploy roominfo --image=team04acr.azurecr.io/roominfo:latest
 kubectl expose deploy roominfo --type="ClusterIP" --port=8080
 
+--------------------------------------------------------------------------------------------------------------------------------
 * 새버전으로의 배포 시작
-kubectl set image deploy payment reservation=team04acr.azurecr.io/payment:latest
+mvn package -Dmaven.test.skip=true
+az acr build --registry team04acr --image team04acr.azurecr.io/room:latest .
+kubectl set image deploy room room=team04acr.azurecr.io/room:latest
+
+siege -c100 -t10S -v --content-type "application/json" 'http://room:8080/rooms POST {"roomStatus": "EMPTY", "roomName":"DERUX"}'
+
 
 
 * 설정파일(YAML)을 통한 Pod 배포 (직접 타이핑)
@@ -168,25 +174,23 @@ apt-get install -y siege
 
 
 <시나리오>
---객실등록
-http POST http://room:8080/rooms roomType="SWEET" roomStatus="EMPTY" roomName="SweetRoom" roomQty=10 roomPrice=60000
+#객실등록
+http POST http://room:8080/rooms roomType="DERUX" roomStatus="EMPTY" roomName="DERUX ROOM" roomQty=10 roomPrice=1200000\
 
---객실조회
-http http://roomInfo:8080/roomInfoes
+#객실 조회
+http http://roomInfo:8080/roomInfoes 
 
---예약 요청
-http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=50000
+#예약요청 (객실이 있을경우)
+http post http://reservation:8080/reservations customerName="PARK CHANG SEON" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=120000
 
---결제 요청
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50001
+#결제요청
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
 
-kubectl scale deploy payment --replicas=0
-
---결제 내역 조회
+#결제 내역 조회
 http http://payment:8080/payments
 
---체크아웃 요청
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50002
+#Check Out
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
 
 --체크아웃 후 객실조회
 http http://roomInfo:8080/roomInfoes
@@ -203,6 +207,7 @@ kubectl get deploy payment -w
 
 ==========================================================
 - 스케일아웃
+siege -c100 -t30S -r10 --content-type "application/json" 'http http://room:8080/rooms {"roomStatus": "EMPTY", "roomName":"DERUX}'
 :
 
 - CQRS
