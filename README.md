@@ -337,14 +337,37 @@ public interface ReservationRepository extends PagingAndSortingRepository<Reserv
 ```
 - 적용 후 REST API 의 테스트
 ```
-#  Room 서비스의 객실정보처리
+#객실등록
 http POST http://room:8080/rooms roomType="DERUX" roomStatus="EMPTY" roomName="DERUX ROOM" roomQty=10 roomPrice=1200000\
 
-#  Reservation 서비스의 예약처리
+#객실 조회
+http http://roomInfo:8080/roomInfoes 
+
+#예약요청 (객실이 있을경우)
 http post http://reservation:8080/reservations customerName="PARK CHANG SEON" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=120000
 
+#결제요청
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
 
+#결제 내역 조회
+http http://payment:8080/payments
+
+#Check Out
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
 ```
+
+![image](https://user-images.githubusercontent.com/69283674/97377996-9ed11c00-1904-11eb-9705-b81ec3e7399e.png)
+
+![image](https://user-images.githubusercontent.com/69283674/97378172-199a3700-1905-11eb-9e97-5450b00e37df.png)
+
+![image](https://user-images.githubusercontent.com/69283674/97378209-2ae34380-1905-11eb-9af7-f428c2c0ac81.png)
+
+![image](https://user-images.githubusercontent.com/69283674/97378300-667e0d80-1905-11eb-816a-fdd22398372b.png)
+
+![image](https://user-images.githubusercontent.com/69283674/97378332-7ac20a80-1905-11eb-85f2-be38ba7003f3.png)
+
+![image](https://user-images.githubusercontent.com/69283674/97378372-90cfcb00-1905-11eb-9707-88259c10d5a3.png)
+
 
 
 
@@ -401,41 +424,6 @@ kubectl scale deploy room --replicas=0
 http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=1 paymentPrice=50001
 ```
 ![image](https://user-images.githubusercontent.com/69283674/97378963-ff615880-1906-11eb-973c-dd307e672a9b.png)
-
-
-
-```
-#객실등록
-http POST http://room:8080/rooms roomType="DERUX" roomStatus="EMPTY" roomName="DERUX ROOM" roomQty=10 roomPrice=1200000\
-
-#객실 조회
-http http://roomInfo:8080/roomInfoes 
-
-#예약요청 (객실이 있을경우)
-http post http://reservation:8080/reservations customerName="PARK CHANG SEON" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=120000
-
-#결제요청
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
-
-#결제 내역 조회
-http http://payment:8080/payments
-
-#Check Out
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="checkOut" customerName="PARK CHANG SEON" customerId=9805 roomNumber=101 paymentPrice=120000
-```
-
-![image](https://user-images.githubusercontent.com/69283674/97377996-9ed11c00-1904-11eb-9705-b81ec3e7399e.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378172-199a3700-1905-11eb-9e97-5450b00e37df.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378209-2ae34380-1905-11eb-9af7-f428c2c0ac81.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378300-667e0d80-1905-11eb-816a-fdd22398372b.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378332-7ac20a80-1905-11eb-85f2-be38ba7003f3.png)
-
-![image](https://user-images.githubusercontent.com/69283674/97378372-90cfcb00-1905-11eb-9707-88259c10d5a3.png)
-
 
 
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
