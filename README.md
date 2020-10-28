@@ -132,7 +132,7 @@
 
 ## 헥사고날 아키텍처 다이어그램 도출
     
-![image](https://user-images.githubusercontent.com/69283674/97154475-40e2ee00-17b7-11eb-9bd6-1d19a6f9e157.png)
+![헥사고날](https://user-images.githubusercontent.com/69283816/97509124-bb348d80-19c4-11eb-91f5-1fdc2c1b57cb.png)
 
     - Inbound adaptor와 Outbound adaptor를 구분함
     - 호출관계에서 PubSub 과 Req/Resp 를 구분함
