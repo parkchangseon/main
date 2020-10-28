@@ -132,7 +132,7 @@ kubectl create deploy roominfo --image=team04acrpark.azurecr.io/roominfo:latest
 kubectl expose deploy roominfo --type="ClusterIP" --port=8080
 
 az acr build --registry team04acrpark --image team04acrpark.azurecr.io/promotion:latest .
-kubectl create deploy promotion --image=team04acrpark.azurecr.io/:latest
+kubectl create deploy promotion --image=team04acrpark.azurecr.io/promotion:latest
 kubectl expose deploy promotion --type="ClusterIP" --port=8080
 
 
