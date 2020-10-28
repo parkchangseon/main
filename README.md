@@ -335,6 +335,8 @@ public interface PaymentManagementService {
             payment.setPaymentPrice(getPaymentPrice());
             payment.setReservationNumber(getReservationNumber());
             payment.setReservationStatus(getReserveStatus()); 
+            payment.setService(getService()); 
+            payment.setPoint(getPoint()); 
             
             Application.applicationContext.getBean(PaymentManagementService.class).CompletePayment(payment);
           
