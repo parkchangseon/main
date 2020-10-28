@@ -63,6 +63,7 @@
   - 서브 도메인, 바운디드 컨텍스트 분리
     - 팀별 KPI 와 관심사, 상이한 배포주기 등에 따른  Sub-domain 이나 Bounded Context 를 적절히 분리하였고 그 분리 기준의 합리성이 충분히 설명되는가?
       - 적어도 3개 이상 서비스 분리
+      - 폴리글랏 설계: 각 마이크로 서비스들의 구현 목표와 기능 특성에 따른 각자의 기술 Stack 과 저장소 구조를 다양하게 채택하여 설계하였는가?
       - 서비스 시나리오 중 ACID 트랜잭션이 크리티컬한 Use 케이스에 대하여 무리하게 서비스가 과다하게 조밀히 분리되지 않았는가?
   - 컨텍스트 매핑 / 이벤트 드리븐 아키텍처 
     - 업무 중요성과  도메인간 서열을 구분할 수 있는가? (Core, Supporting, General Domain)
@@ -102,6 +103,7 @@
 
   - 무정지 운영 CI/CD (10)
     - Readiness Probe 의 설정과 Rolling update을 통하여 신규 버전이 완전히 서비스를 받을 수 있는 상태일때 신규버전의 서비스로 전환됨을 siege 등
+    - Contract Test : 자동화된 경계 테스트를 통하여 구현 오류나 API 계약위반를 미리 차단 가능한가?
 
 # 분석/설계
 
@@ -115,7 +117,7 @@
 [조직 KPI]
 예약팀 : 고객의 예약을 최대한 많이 받아야 함.
 결제팀 : 결제 안정성을 최대한 확보해야 함.
-객실팀 : 고객의 객실평가 점수가 높아야 함.
+객실팀 : 객실관리 편의성이 높아야 함.
 
 ## Event Storming 결과
 * MSAEz 로 모델링한 이벤트스토밍 결과: 
@@ -148,7 +150,7 @@ https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be
     - 도메인 서열 분리 
         - Core Domain:  Reservation : 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 app 의 경우 1주일 1회 미만
         - Supporting Domain:   Room : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
-        - General Domain:   Payment : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 (핑크색으로 이후 전환할 예정)
+        - General Domain:   Payment : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 
 
 ### 폴리시 부착 (괄호는 수행주체, 폴리시 부착을 둘째단계에서 해놔도 상관 없음. 전체 연계가 초기에 드러남)
 
@@ -190,7 +192,7 @@ https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be
     
     - 고객이 숙소 예약상태를 중간중간 조회한다 (OK)
     
-    - 예약상태가 바뀔떄마다 알람을 보낸다 (OK)
+    - 예약상태가 바뀔때마다 알람을 보낸다 (OK)
 
 
 ### 비기능 요구사항에 대한 검증
@@ -341,8 +343,6 @@ http POST http://room:8080/rooms roomType="DERUX" roomStatus="EMPTY" roomName="D
 #  Reservation 서비스의 예약처리
 http post http://reservation:8080/reservations customerName="PARK CHANG SEON" customerId=9805 reserveStatus="reserve" roomNumber=101 paymentPrice=120000
 
-# 예약 상태 확인
-http http://roomInfo:8080/roomInfoes
 
 ```
 
@@ -391,10 +391,17 @@ public interface PaymentManagementService {
 
 - 동기식으로 결제 요청시 결제 시스템 장애의 경우 예약 불가 확인 :
 ```
-#결제요청
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=1 paymentPrice=50001
+# 결제 서비스 (pament) 를 잠시 내려놓음 
+kubectl scale deploy room --replicas=0
+```
+![image](https://user-images.githubusercontent.com/69283674/97378907-db9e1280-1906-11eb-8ea9-09d6e20272d4.png)
 
 ```
+#결제요청
+http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=1 paymentPrice=50001
+```
+![image](https://user-images.githubusercontent.com/69283674/97378963-ff615880-1906-11eb-973c-dd307e672a9b.png)
+
 
 
 ```
@@ -431,7 +438,6 @@ http post http://reservation:8080/reservations reservationNumber=1 reserveStatus
 
 
 
-
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
 
@@ -464,7 +470,7 @@ public class Reservation  {
 - 예약 서비스에서 해당 비동기 호출을 수신할 PolicyHandler를 구현
 
 ```
-package hotelmanage;
+package accommodation;
 
 ...
 
@@ -496,24 +502,41 @@ public class PolicyHandler{
 ```
 # 객실 서비스 (room) 를 잠시 내려놓음 (ctrl+c)
 kubectl scale deploy room --replicas=0
+```
+![image](https://user-images.githubusercontent.com/69283674/97379442-28ceb400-1908-11eb-8171-376af4ecdc6d.png)
 
+```
 #예약 및 결제처리
 http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=1 paymentPrice=50000
    #Success
 http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50001
    #Success
+```
+![image](https://user-images.githubusercontent.com/69283674/97379492-4734af80-1908-11eb-9164-74a2ad44d093.png)
+![image](https://user-images.githubusercontent.com/69283674/97379504-50258100-1908-11eb-8d8d-81837dceb29d.png)
 
+
+```
 #객실상태 확인
 http http://roomInfo:8080/roomInfoes     # 객실 상태 안바뀜 확인
-
-#객실 서비스 기동
---cd RoomManagement
---mvn spring-boot:run
-kubectl scale deploy room --replicas=1
-
-#객실상태 확인
-http localhost:8084/roomInfos     # 객실의 상태가 "Notavailable"으로 확인
 ```
+![image](https://user-images.githubusercontent.com/69283674/97379568-6e8b7c80-1908-11eb-9def-e0a6d327cd2c.png)
+
+
+```
+#객실 서비스 기동
+kubectl scale deploy room --replicas=1
+```
+![image](https://user-images.githubusercontent.com/69283674/97379616-8400a680-1908-11eb-8805-0ba9312dca5c.png)
+
+
+```
+#객실상태 확인
+http localhost:8084/roomInfos     # 객실의 상태가 "NotavAilable"으로 확인
+```
+![image](https://user-images.githubusercontent.com/69283674/97379659-a09cde80-1908-11eb-85b0-5bbf408143ad.png)
+
+
 
 ## CQRS 패턴 
 사용자 View를 위한 객실 정보 조회 서비스를 위한 별도의 객실 정보 저장소를 구현
