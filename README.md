@@ -125,7 +125,7 @@
    -> 10만원 이상 "할인쿠폰", 5만원상 10만원미만 음료수 제공 및 포인트 적립
 
 2. 장애격리
- - 객실관리시스템이 수행되지 않더라도 프로모션은 365일 24시간 제공될 수 있어야 한다 Async (event-driven), Eventual Consistency
+ - 객실관리시스템이(객실등록,객실예약 등) 수행되지 않더라도 프로모션은 365일 24시간 제공될 수 있어야 한다 Async (event-driven), Eventual Consistency
  - 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 프로모션을 잠시후에 하도록 유도한다 Circuit breaker, fallback
  
 3. 성능
