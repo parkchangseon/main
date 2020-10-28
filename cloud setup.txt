@@ -123,12 +123,6 @@ az acr build --registry team04acrpark --image team04acrpark.azurecr.io/notice:la
 kubectl create deploy notice --image=team04acrpark.azurecr.io/notice:latest
 kubectl expose deploy notice --type="ClusterIP" --port=8080
 
-mvn clean
-docker build -t team04acr.azurecr.io/gateway:latest .
-az acr build --registry team04acrpark --image team04acrpark.azurecr.io/gateway:latest .
-kubectl create deploy gateway --image=team04acrpark.azurecr.io/gateway:latest
-kubectl expose deploy gateway --type="ClusterIP" --port=8080
-
 az acr build --registry team04acrpark --image team04acrpark.azurecr.io/room:latest .
 kubectl create deploy room --image=team04acrpark.azurecr.io/room:latest
 kubectl expose deploy room --type="ClusterIP" --port=8080
@@ -140,6 +134,14 @@ kubectl expose deploy roominfo --type="ClusterIP" --port=8080
 az acr build --registry team04acrpark --image team04acrpark.azurecr.io/promotion:latest .
 kubectl create deploy roominfo --image=team04acrpark.azurecr.io/:latest
 kubectl expose deploy roominfo --type="ClusterIP" --port=8080
+
+
+mvn clean
+docker build -t team04acr.azurecr.io/gateway:latest .
+mvn package -Dmaven.test.skip=true
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/gateway:latest .
+kubectl create deploy gateway --image=team04acrpark.azurecr.io/gateway:latest
+kubectl expose deploy gateway --type="ClusterIP" --port=8080
 
 --------------------------------------------------------------------------------------------------------------------------------
 * 새버전으로의 배포 시작
