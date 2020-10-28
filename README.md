@@ -449,22 +449,26 @@ http post http://reservation:8080/reservations reservationNumber=1 reserveStatus
 package accommodation;
 
 @Entity
-@Table(name="Reservation_table")
-public class Reservation  {
+@Table(name="Payment_table")
+public class Payment   {
 
  ...
     @PrePersist
     public void onPrePersist(){
-        setReserveStatus("reserve");
-        Reserved reserved = new Reserved();
-        reserved.setReservationNumber(this.getReservationNumber());
-        reserved.setReserveStatus(this.getReserveStatus());
-        reserved.setCustomerName(this.getCustomerName());
-        reserved.setCustomerId(this.getCustomerId());
-        reserved.setRoomNumber(this.getRoomNumber());
-        reserved.setPaymentPrice(this.getPaymentPrice());
+        if ("payment".equals(ReservationStatus) ) {
+            System.out.println("=============결재 승인 처리중=============");
+            PaymentCompleted paymentCompleted = new PaymentCompleted();
 
-        reserved.publishAfterCommit();
+            setPaymentStatus("Y");
+            paymentCompleted.setPaymentId(PaymentId);
+            paymentCompleted.setReservationNumber(ReservationNumber);
+            paymentCompleted.setPaymentPrice(PaymentPrice);
+            paymentCompleted.setReservationStatus(ReservationStatus);
+            paymentCompleted.setPaymentStatus(PaymentStatus);
+            BeanUtils.copyProperties(this, paymentCompleted);
+            paymentCompleted.publishAfterCommit();
+
+        }
     }    
 ```
 - 예약 서비스에서 해당 비동기 호출을 수신할 PolicyHandler를 구현
@@ -478,18 +482,17 @@ package accommodation;
 public class PolicyHandler{
 
     @Autowired
-    ReservationRepository reservationManagementrepository;
+    RoomRepository roomManagementRepository;
     
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverPaymentCompleted_ChangeResvStatus(@Payload PaymentCompleted paymentcompleted){
-        System.out.println(paymentcompleted.toJson());
-        if(paymentcompleted.isMe()){
-            System.out.println("====================================결제완료 1차====================================");
-            if(reservationManagementrepository.findById(paymentcompleted.getReservationNumber()) != null){
-                System.out.println("====================================결제완료====================================");
-                Reservation reservationManagement = reservationManagementrepository.findById(paymentcompleted.getReservationNumber()).get();
-                reservationManagement.setReserveStatus("paymentComp");
-                reservationManagementrepository.save(reservationManagement);
+    public void wheneverReserved_객실상태변경(@Payload Reserved reserved){
+        if(reserved.isMe()){
+            System.out.println("##### listener 객실상태변경 : " + reserved.toJson());
+            if(roomManagementRepository.findById(reserved.getRoomNumber()) != null && "reserve".equals(reserved.getReserveStatus())){
+                Room room = new Room();
+                room.setRoomNo(reserved.getRoomNumber());
+                room.setRoomStatus("RoomNotAvaliable");
+                roomManagementRepository.save(room);
             }
         }
     }
@@ -543,6 +546,39 @@ http localhost:8084/roomInfos     # 객실의 상태가 "NotavAilable"으로 확
 - 이를 하여 RoomInfo 서비스를 별도로 구축하고 저장 이력을 기록한다.
 - 모든 정보는 비동기 방식으로 호출한다.
 
+
+```
+Reservation.java(Entity)
+package accommodation;
+
+@Entity
+@Table(name="Reservation_table")
+public class Reservation {
+
+    @Id
+    @GeneratedValue(strategy=GenerationType.AUTO)
+    private Integer reservationNumber;
+    private String customerName;
+    private Integer customerId;
+    private String reserveStatus;
+    private Integer roomNumber;
+    private Integer PaymentPrice;
+
+    @PrePersist
+    public void onPrePersist(){
+        setReserveStatus("reserve");
+        Reserved reserved = new Reserved();
+        reserved.setReservationNumber(this.getReservationNumber());
+        reserved.setReserveStatus(this.getReserveStatus());
+        reserved.setCustomerName(this.getCustomerName());
+        reserved.setCustomerId(this.getCustomerId());
+        reserved.setRoomNumber(this.getRoomNumber());
+        reserved.setPaymentPrice(this.getPaymentPrice());
+
+        reserved.publishAfterCommit();
+    }
+
+```
 ```
 Room.java(Entity)
 
@@ -581,6 +617,7 @@ public class Room {
         System.out.println("예약가능으로 변경");
     }
 ```
+
 - RoomInfo에 저장하는 서비스 정책 (PolicyHandler)구현
 ```
 PolicyHandler.java
@@ -607,6 +644,50 @@ public class PolicyHandler{
             roomInfoRepository.save(roomInfo);
         }
     }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverSave_Reserved(@Payload Reserved reserved) {
+        if (reserved.isMe()) {
+            // external message send
+            System.out.println("##### listener 예약정보 저장 : " + reserved.toJson());
+            RoomInfo roomInfo = new RoomInfo();
+            roomInfo.setReserveNo(reserved.getReserveNo());
+            roomInfo.setCustomerName(reserved.getCustomerName());
+            roomInfo.setCustomerId(reserved.getCustomerId());
+            roomInfo.setReservationStatus(reserved.getReserveStatus());
+            roomInfo.setRoomNo(reserved.getRoomNo());
+            roomInfo.setReservePrice(reserved.getReservePrice());
+        }
+    }    
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverSave_PaymentCompleted(@Payload PaymentCompleted paymentCompleted){
+        if(paymentCompleted.isMe()){
+            // external message send
+            System.out.println("##### listener 결제 정보저장 : " + paymentCompleted.toJson());
+            RoomInfo roomInfo = new RoomInfo();
+            roomInfo.setReservationNumber(paymentCompleted.getReservationNumber());
+            roomInfo.setPaymentId(paymentCompleted.getPaymentId());
+            roomInfo.setPaymentPrice(paymentCompleted.getPaymentPrice());
+            roomInfo.setReservationStatus(paymentCompleted.getReservationStatus());
+
+            roomInfoRepository.save(roomInfo);
+        }
+    }
+
+    @StreamListener(KafkaProcessor.INPUT)
+    public void wheneverSave_CheckOuted(@Payload CheckedOut checkedOut){
+        if(checkedOut.isMe()){
+            System.out.println("##### listener 체크아웃 정보저장 : " + checkedOut.toJson());
+            RoomInfo roomInfo = new RoomInfo();
+            roomInfo.setReserveNo(checkedOut.getReserveNo());
+            roomInfo.setCustomerName(checkedOut.getCustomerName());
+            roomInfo.setRoomNo(checkedOut.getRoomNo());
+            roomInfo.setCustomerId(checkedOut.getCustomerId());
+            roomInfo.setCustomerName(checkedOut.getCustomerName());
+            roomInfo.setReservationStatus(checkedOut.getReserveStatus());
+        }
+    }
 }
 
 ```
@@ -620,9 +701,9 @@ Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 
 
 # 운영
 
-## CI/CD 설정
+## Deploy 
 
-각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 AZURE를 사용하였으며, pipeline build script 는 각 프로젝트 폴더 이하에 azure-pipelines.yml 에 포함되었다.
+각 구현체들은 각자의 source repository 에 구성되었고, 사용한 CI/CD 플랫폼은 AZURE를 사용하였다.
 
 -  아래와 같이 pod 가 정상적으로 올라간 것을 확인하였다. 
 
@@ -651,9 +732,9 @@ hystrix:
 
 ```
 
-- 피호출 서비스(결제:PaymentManagement) 의 임의 부하 처리 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
+- 피호출 서비스(결제:Payment) 의 임의 부하 처리 - 400 밀리에서 증감 220 밀리 정도 왔다갔다 하게
 ```
-# (PaymentManagement) Payment.java (Entity)
+# (Payment) Payment.java (Entity)
 
     @PrePersist
     public void onPrePersist(){  //결제이력을 저장한 후 적당한 시간 끌기
