@@ -29,7 +29,7 @@
 비기능적 요구사항
 1. 트랜잭션
 
-    i. 결제가 되지 않은 건은 프로모션이 제공되지 않는다. Sync 호출 
+    i. 결제가 되지 않은 건은 프로모션 적용이 되지 않아야 한다. Sync 호출 
 2. 장애격리
 
     i. 객실관리시스템이 수행되지 않더라도 프로모션은 365일 24시간 제공되어야 한다.  Async (event-driven), Eventual Consistency
@@ -154,9 +154,9 @@ https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be
 ![image](https://user-images.githubusercontent.com/69283674/97153970-ada9b880-17b6-11eb-877b-95b4f9813a7d.png)
 
 1. 트랜잭션
- - 결제가 되지 않은 건은 프로모션이 제공되지 않아야 한다 Sync 호출
- -> 예약 시 결제처리:  결제가 완료되지 않은 주문은 절대 받지 않는다는 경영자의 오랜 신념(?) 에 따라, ACID 트랜잭션 적용. 예약완료시 결제처리에 대해서는 Request-Response 방식 처리
- 
+ - 결제가 되지 않은 건은 프로모션이 적용되지 않아야 한다 Sync 호출
+   -> 10만원 이상 "할인쿠폰", 5만원상 10만원미만 음료수 제공 및 포인트 적립
+
 2. 장애격리
  - 객실관리시스템이 수행되지 않더라도 프로모션은 365일 24시간 제공될 수 있어야 한다 Async (event-driven), Eventual Consistency
  -> 결제 완료시 프로모션연결 및 확정처리:  App(front) 에서 Room 마이크로서비스로 예약요청이 전달되는 과정에 있어서 Room 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
@@ -328,20 +328,15 @@ http post http://promotion:8080/promotions paymentId=3 paymentPrice=10000 paymen
 http http://roomInfo:8080/roomInfoes
 ```
 
-![image](https://user-images.githubusercontent.com/69283674/97377996-9ed11c00-1904-11eb-9705-b81ec3e7399e.png)
+![프로모션적립](https://user-images.githubusercontent.com/69283816/97448771-56514700-1974-11eb-9d53-8b645320fb01.png)
 
-![image](https://user-images.githubusercontent.com/69283674/97378172-199a3700-1905-11eb-9e97-5450b00e37df.png)
-
-
-
-
+![프로모션확인](https://user-images.githubusercontent.com/69283816/97449302-dd9eba80-1974-11eb-81ed-822a6475af73.png)
 
 
 ## 동기식 호출 
 
-분석단계에서의 조건 중 하나로 예약(Reservation)->결제(Payment) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
-
-- 결제서비스를 호출하기 위하여 Stub과 (FeignClient) 를 이용하여 Service 대행 인터페이스 (Proxy) 를 구현 
+분석단계에서의 조건 중 하나로 결제(Reservation)->프로모션(Promotion) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 
+호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
 ```
 # (payment) PaymentManagementService.java
@@ -351,11 +346,11 @@ import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 @org.springframework.stereotype.Service
-@FeignClient(name="reservationNumber", url="${api.url.payment}")
+@FeignClient(name="paymentNumber", url="${api.url.promotion}")
 public interface PaymentManagementService {
 
-    @RequestMapping(method= RequestMethod.POST, path="/payments", consumes = "application/json")
-    public void CompletePayment(@RequestBody Payment payment);
+    @RequestMapping(method= RequestMethod.POST, path="/promotions", consumes = "application/json")
+    public void CompletePromotion(@RequestBody Promotion promotion);
 
 }
 ```
@@ -377,7 +372,7 @@ public interface PaymentManagementService {
     }
 ```
 
-- 동기식으로 결제 요청시 결제 시스템 장애의 경우 예약 불가 확인 :
+- 동기식으로 프로모션 요청시 결제 시스템 장애의 경우 프로모션 불가 확인 :
 ```
 # 결제 서비스 (pament) 를 잠시 내려놓음 
 kubectl scale deploy room --replicas=0
@@ -385,8 +380,8 @@ kubectl scale deploy room --replicas=0
 ![image](https://user-images.githubusercontent.com/69283674/97378907-db9e1280-1906-11eb-8ea9-09d6e20272d4.png)
 
 ```
-#결제요청
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=1 paymentPrice=50001
+#프로모션요청
+http post http://promotion:8080/promotions paymentId=1 paymentPrice=100000 paymentStatus="Y" reserveStatus="promotion"
 ```
 ![image](https://user-images.githubusercontent.com/69283674/97378963-ff615880-1906-11eb-973c-dd307e672a9b.png)
 
@@ -394,9 +389,9 @@ http post http://reservation:8080/reservations reservationNumber=1 reserveStatus
 ## 비동기식 호출 / 시간적 디커플링 / 장애격리 / 최종 (Eventual) 일관성 테스트
 
 
-결제 이후 이를 예약 정보 변경은 비동기로 호출하여 개별적으로 조회 가능하도록 구현
+프로모션 적용 이후 이를 예약 정보 서비스를 비동기로 호출하여 개별적으로 조회 가능하도록 구현
  
-- 이를 위하여 결제이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 프로모션 이력에 기록을 남긴 후에 곧바로 결제승인이 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
 package accommodation;
@@ -407,22 +402,41 @@ public class Payment   {
 
  ...
     @PrePersist
-    public void onPrePersist(){
-        if ("payment".equals(ReservationStatus) ) {
-            System.out.println("=============결재 승인 처리중=============");
-            PaymentCompleted paymentCompleted = new PaymentCompleted();
+    public void onPrePersist() {
+        if ("promotion".equals(reserveStatus) ) {
+            System.out.println("=============마일리지 적립 처리중=============");
+            setReserveStatus("promotion");
+            PromotionSaved couponSaved = new PromotionSaved();
 
-            setPaymentStatus("Y");
-            paymentCompleted.setPaymentId(PaymentId);
-            paymentCompleted.setReservationNumber(ReservationNumber);
-            paymentCompleted.setPaymentPrice(PaymentPrice);
-            paymentCompleted.setReservationStatus(ReservationStatus);
-            paymentCompleted.setPaymentStatus(PaymentStatus);
-            BeanUtils.copyProperties(this, paymentCompleted);
-            paymentCompleted.publishAfterCommit();
+            couponSaved.setCustomerId(customerId);
+            couponSaved.setCustomerName(customerName);
+            couponSaved.setPaymentId(paymentId);
+            couponSaved.setPaymentPrice(paymentPrice);
+            couponSaved.setPaymentStatus(paymentStatus);
 
+            if("Y".equals(paymentStatus)) {
+                if (paymentPrice >= 100000) {
+                    service = "DISCOUNT COUPON";
+                } else if (paymentPrice >= 50000 && paymentPrice < 100000) {
+                    service = "BEVERAGE";
+                } else {
+                    point = paymentPrice / 10;
+                }
+            } else {
+                point = 0;
+            }
+            BeanUtils.copyProperties(this, couponSaved);
+
+            couponSaved.publishAfterCommit();
+
+            try {
+                Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+                System.out.println("=============마일리지 적립 완료=============");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
-    }    
+    } 
 ```
 - 예약 서비스에서 해당 비동기 호출을 수신할 PolicyHandler를 구현
 
@@ -435,139 +449,73 @@ package accommodation;
 public class PolicyHandler{
 
     @Autowired
-    RoomRepository roomManagementRepository;
-    
+    ReservationRepository reservationManagementRepository;
+
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverReserved_객실상태변경(@Payload Reserved reserved){
-        if(reserved.isMe()){
-            System.out.println("##### listener 객실상태변경 : " + reserved.toJson());
-            if(roomManagementRepository.findById(reserved.getRoomNumber()) != null && "reserve".equals(reserved.getReserveStatus())){
-                Room room = new Room();
-                room.setRoomNo(reserved.getRoomNumber());
-                room.setRoomStatus("RoomNotAvaliable");
-                roomManagementRepository.save(room);
+    public void wheneverPromotionCompleted_ChangeResvStatus(@Payload PromotionSaved promotionSaved){
+        System.out.println(promotionSaved.toJson());
+        if(promotionSaved.isMe()){
+            System.out.println("====================================프로모션 적립 1차====================================");
+            if(reservationManagementRepository.findById(promotionSaved.getPaymentId()) != null){
+                System.out.println("====================================프로모션 적립 완료====================================");
+                Reservation reservationManagement = reservationManagementRepository.findById(promotionSaved.getPaymentId()).get();
+                reservationManagement.setReserveStatus("paymentComp");
+                reservationManagementRepository.save(reservationManagement);
             }
         }
     }
-
 }
 
 ```
-
-객실 시스템은 예약/결제와 완전히 분리되어있으며, 이벤트 수신에 따라 처리되기 때문에, 객실시스템이 유지보수로 인해 잠시 내려간 상태라도 예약을 받는데 문제가 없다:
-```
-# 객실 서비스 (room) 를 잠시 내려놓음 (ctrl+c)
-kubectl scale deploy room --replicas=0
-```
-![image](https://user-images.githubusercontent.com/69283674/97379442-28ceb400-1908-11eb-8171-376af4ecdc6d.png)
-
-```
-#예약 및 결제처리
-http post http://reservation:8080/reservations customerName="PARK" customerId=9805 reserveStatus="reserve" roomNumber=1 paymentPrice=50000
-   #Success
-http post http://reservation:8080/reservations reservationNumber=1 reserveStatus="payment" customerName="PARK" customerId=9805 roomNumber=101 paymentPrice=50001
-   #Success
-```
-![image](https://user-images.githubusercontent.com/69283674/97379492-4734af80-1908-11eb-9164-74a2ad44d093.png)
-![image](https://user-images.githubusercontent.com/69283674/97379504-50258100-1908-11eb-8d8d-81837dceb29d.png)
-
-
-```
-#객실상태 확인
-http http://roomInfo:8080/roomInfoes     # 객실 상태 안바뀜 확인
-```
-![image](https://user-images.githubusercontent.com/69283674/97379568-6e8b7c80-1908-11eb-9def-e0a6d327cd2c.png)
-
-
-```
-#객실 서비스 기동
-kubectl scale deploy room --replicas=1
-```
-![image](https://user-images.githubusercontent.com/69283674/97379616-8400a680-1908-11eb-8805-0ba9312dca5c.png)
-
-
-```
-#객실상태 확인
-http localhost:8084/roomInfos     # 객실의 상태가 "NotavAilable"으로 확인
-```
-![image](https://user-images.githubusercontent.com/69283674/97379659-a09cde80-1908-11eb-85b0-5bbf408143ad.png)
-
-
 
 ## CQRS 패턴 
 사용자 View를 위한 객실 정보 조회 서비스를 위한 별도의 객실 정보 저장소를 구현
 - 이를 하여 RoomInfo 서비스를 별도로 구축하고 저장 이력을 기록한다.
 - 모든 정보는 비동기 방식으로 호출한다.
 
-
 ```
-Reservation.java(Entity)
-package accommodation;
+Promotion.java(Entity)
 
 @Entity
-@Table(name="Reservation_table")
-public class Reservation {
-
-    @Id
-    @GeneratedValue(strategy=GenerationType.AUTO)
-    private Integer reservationNumber;
-    private String customerName;
-    private Integer customerId;
-    private String reserveStatus;
-    private Integer roomNumber;
-    private Integer PaymentPrice;
-
-    @PrePersist
-    public void onPrePersist(){
-        setReserveStatus("reserve");
-        Reserved reserved = new Reserved();
-        reserved.setReservationNumber(this.getReservationNumber());
-        reserved.setReserveStatus(this.getReserveStatus());
-        reserved.setCustomerName(this.getCustomerName());
-        reserved.setCustomerId(this.getCustomerId());
-        reserved.setRoomNumber(this.getRoomNumber());
-        reserved.setPaymentPrice(this.getPaymentPrice());
-
-        reserved.publishAfterCommit();
-    }
-
-```
-```
-Room.java(Entity)
-
-@Entity
-@Table(name="Room_table")
-public class Room {
+@Table(name="Promotion_table")
+public class Promotion {
     ...
 
-    @PostPersist
-    public void onPostPersist(){
-        RoomConditionChanged roomConditionChanged = new RoomConditionChanged();
-        roomConditionChanged.setRoomNo(this.getRoomNo());
-        roomConditionChanged.setRoomType(this.getRoomType());
-        roomConditionChanged.setRoomStatus(this.getRoomStatus());
-        roomConditionChanged.setRoomName(this.getRoomName());
-        roomConditionChanged.setRoomQty(this.getRoomQty());
-        roomConditionChanged.setRoomPrice(this.getRoomPrice());
+    @PrePersist
+    public void onPrePersist() {
+        if ("promotion".equals(reserveStatus) ) {
+            System.out.println("============= 적립 처리중=============");
+            setReserveStatus("promotion");
+            PromotionSaved couponSaved = new PromotionSaved();
 
-        BeanUtils.copyProperties(this, roomConditionChanged);
+            couponSaved.setCustomerId(customerId);
+            couponSaved.setCustomerName(customerName);
+            couponSaved.setPaymentId(paymentId);
+            couponSaved.setPaymentPrice(paymentPrice);
+            couponSaved.setPaymentStatus(paymentStatus);
 
-        roomConditionChanged.publishAfterCommit();
-    }
-    @PostUpdate
-    public void onPostUpdate(){
-        System.out.println("예약가능?:"+this.roomStatus);
-        RoomConditionChanged roomConditionChanged = new RoomConditionChanged();
-        roomConditionChanged.setRoomNo(this.getRoomNo());
-        roomConditionChanged.setRoomType(this.getRoomType());
-        roomConditionChanged.setRoomStatus(this.getRoomStatus());
-        roomConditionChanged.setRoomName(this.getRoomName());
-        roomConditionChanged.setRoomQty(this.getRoomQty());
-        roomConditionChanged.setRoomPrice(this.getRoomPrice());
+            if("Y".equals(paymentStatus)) {
+                if (paymentPrice >= 100000) {
+                    service = "DISCOUNT COUPON";
+                } else if (paymentPrice >= 50000 && paymentPrice < 100000) {
+                    service = "BEVERAGE";
+                } else {
+                    point = paymentPrice / 10;
+                }
+            } else {
+                point = 0;
+            }
+            BeanUtils.copyProperties(this, couponSaved);
 
-        BeanUtils.copyProperties(this, roomConditionChanged);
-        roomConditionChanged.publishAfterCommit();
-        System.out.println("예약가능으로 변경");
+            couponSaved.publishAfterCommit();
+
+            try {
+                Thread.currentThread().sleep((long) (400 + Math.random() * 220));
+                System.out.println("=============마일리지 적립 완료=============");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
     }
 ```
 
@@ -582,66 +530,21 @@ public class PolicyHandler{
     RoomInfoRepository roomInfoRepository;
 
     @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverSave_RoomInfo(@Payload RoomConditionChanged roomConditionChanged){
-        if(roomConditionChanged.isMe()){
-            System.out.println("##### listener 객실정보저장 : " + roomConditionChanged.toJson());
-            RoomInfo roomInfo = new RoomInfo();
-            roomInfo.setRoomNumber(roomConditionChanged.getRoomNumber());
-            roomInfo.setRoomName(roomConditionChanged.getRoomName());
-            roomInfo.setRoomStatus(roomConditionChanged.getRoomStatus());
-            roomInfo.setRoomPrice(roomConditionChanged.getRoomPrice());
-            roomInfo.setRoomQty(roomConditionChanged.getRoomQty());
-            roomInfo.setRoomStatus(roomConditionChanged.getRoomStatus());
-            roomInfo.setRoomType(roomConditionChanged.getRoomType());
-
-            roomInfoRepository.save(roomInfo);
-        }
-    }
-
-    @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverSave_Reserved(@Payload Reserved reserved) {
-        if (reserved.isMe()) {
+    public void wheneverSave_PromotionSaved(@Payload PromotionSaved promotionSaved) {
+        if (promotionSaved.isMe()) {
             // external message send
-            System.out.println("##### listener 예약정보 저장 : " + reserved.toJson());
+            System.out.println("##### listener Promotion 저장 : " + promotionSaved.toJson());
             RoomInfo roomInfo = new RoomInfo();
-            roomInfo.setReserveNo(reserved.getReserveNo());
-            roomInfo.setCustomerName(reserved.getCustomerName());
-            roomInfo.setCustomerId(reserved.getCustomerId());
-            roomInfo.setReservationStatus(reserved.getReserveStatus());
-            roomInfo.setRoomNo(reserved.getRoomNo());
-            roomInfo.setReservePrice(reserved.getReservePrice());
-            
-            roomInfoRepository.save(roomInfo);
-        }
-    }    
+            roomInfo.setPaymentId(promotionSaved.getPaymentId());
+            roomInfo.setPaymentPrice(promotionSaved.getPaymentPrice());
+            roomInfo.setPaymentStatus(promotionSaved.getPaymentStatus());
+            roomInfo.setService(promotionSaved.getService());
+            roomInfo.setCouponId(promotionSaved.getCouponId());
+            roomInfo.setPoint(promotionSaved.getPoint());
+            roomInfo.setReserveStatus(promotionSaved.getReserveStatus());
+            roomInfo.setCustomerId(promotionSaved.getCustomerId());
+            roomInfo.setCustomerName(promotionSaved.getCustomerName());
 
-    @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverSave_PaymentCompleted(@Payload PaymentCompleted paymentCompleted){
-        if(paymentCompleted.isMe()){
-            // external message send
-            System.out.println("##### listener 결제 정보저장 : " + paymentCompleted.toJson());
-            RoomInfo roomInfo = new RoomInfo();
-            roomInfo.setReservationNumber(paymentCompleted.getReservationNumber());
-            roomInfo.setPaymentId(paymentCompleted.getPaymentId());
-            roomInfo.setPaymentPrice(paymentCompleted.getPaymentPrice());
-            roomInfo.setReservationStatus(paymentCompleted.getReservationStatus());
-
-            roomInfoRepository.save(roomInfo);
-        }
-    }
-
-    @StreamListener(KafkaProcessor.INPUT)
-    public void wheneverSave_CheckOuted(@Payload CheckedOut checkedOut){
-        if(checkedOut.isMe()){
-            System.out.println("##### listener 체크아웃 정보저장 : " + checkedOut.toJson());
-            RoomInfo roomInfo = new RoomInfo();
-            roomInfo.setReserveNo(checkedOut.getReserveNo());
-            roomInfo.setCustomerName(checkedOut.getCustomerName());
-            roomInfo.setRoomNo(checkedOut.getRoomNo());
-            roomInfo.setCustomerId(checkedOut.getCustomerId());
-            roomInfo.setCustomerName(checkedOut.getCustomerName());
-            roomInfo.setReservationStatus(checkedOut.getReserveStatus());
-            
             roomInfoRepository.save(roomInfo);
         }
     }
