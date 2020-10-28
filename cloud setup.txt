@@ -135,7 +135,6 @@ az acr build --registry team04acrpark --image team04acrpark.azurecr.io/promotion
 kubectl create deploy promotion --image=team04acrpark.azurecr.io/promotion:latest
 kubectl expose deploy promotion --type="ClusterIP" --port=8080
 
-
 mvn clean
 docker build -t team04acr.azurecr.io/gateway:latest .
 mvn package -Dmaven.test.skip=true
