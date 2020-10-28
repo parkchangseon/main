@@ -519,12 +519,11 @@ Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 
 
 -  아래와 같이 pod 가 정상적으로 올라간 것을 확인하였다. 
 
-![image](https://user-images.githubusercontent.com/69283674/97273735-10628900-1877-11eb-9f62-2d5fccea4c13.png)
+![POD 확인](https://user-images.githubusercontent.com/69283816/97471784-6bd26b00-198c-11eb-83ea-9441b6e0cd51.png)
 
 -  아래와 같이 쿠버네티스에 모두 서비스로 등록된 것을 확인할 수 있다. 
 
-![image](https://user-images.githubusercontent.com/69283674/97273520-d6918280-1876-11eb-8530-1447d2000735.png)
-
+![모든서비스확인](https://user-images.githubusercontent.com/69283816/97471853-80166800-198c-11eb-83c3-d56a7b20b9de.png)
 
 ## 동기식 호출 / 서킷 브레이킹 / 장애격리
 
