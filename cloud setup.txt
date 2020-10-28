@@ -70,6 +70,15 @@ git clone https://github.com/accommodationMgt/Payment.git
 git clone https://github.com/accommodationMgt/RoomInfo.git
 git clone https://github.com/accommodationMgt/Gateway.git
 
+git clone https://github.com/parkchangseon/Notice.git
+git clone https://github.com/parkchangseon/main.git
+git clone https://github.com/parkchangseon/RoomInfo.git
+git clone https://github.com/parkchangseon/Room.git
+git clone https://github.com/parkchangseon/Reservation.git
+git clone https://github.com/parkchangseon/Payment.git
+git clone https://github.com/parkchangseon/Gateway.git
+
+
 * 마이크로서비스 배포
 -객실(Room) 서비스 
 cd Room
