@@ -111,33 +111,33 @@ kubectl expose deploy room --type="ClusterIP" --port=8080
 kubectl get po
 kubectl get all
 
-az acr build --registry team04acr --image team04acrpark.azurecr.io/reservation:latest .
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/reservation:latest .
 kubectl create deploy reservation --image=team04acrpark.azurecr.io/reservation:latest
 kubectl expose deploy reservation --type="ClusterIP" --port=8080
 
-az acr build --registry team04acr --image team04acrpark.azurecr.io/payment:latest .
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/payment:latest .
 kubectl create deploy payment --image=team04acrpark.azurecr.io/payment:latest
 kubectl expose deploy payment --type="ClusterIP" --port=8080
 
-az acr build --registry team04acr --image team04acrpark.azurecr.io/notice:latest .
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/notice:latest .
 kubectl create deploy notice --image=team04acrpark.azurecr.io/notice:latest
 kubectl expose deploy notice --type="ClusterIP" --port=8080
 
 mvn clean
 docker build -t team04acr.azurecr.io/gateway:latest .
-az acr build --registry team04acr --image team04acrpark.azurecr.io/gateway:latest .
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/gateway:latest .
 kubectl create deploy gateway --image=team04acrpark.azurecr.io/gateway:latest
 kubectl expose deploy gateway --type="ClusterIP" --port=8080
 
-az acr build --registry team04acr --image team04acrpark.azurecr.io/room:latest .
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/room:latest .
 kubectl create deploy room --image=team04acrpark.azurecr.io/room:latest
 kubectl expose deploy room --type="ClusterIP" --port=8080
 
-az acr build --registry team04acr --image team04acrpark.azurecr.io/roominfo:latest .
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/roominfo:latest .
 kubectl create deploy roominfo --image=team04acrpark.azurecr.io/roominfo:latest
 kubectl expose deploy roominfo --type="ClusterIP" --port=8080
 
-az acr build --registry team04acr --image team04acrpark.azurecr.io/promotion:latest .
+az acr build --registry team04acrpark --image team04acrpark.azurecr.io/promotion:latest .
 kubectl create deploy roominfo --image=team04acrpark.azurecr.io/:latest
 kubectl expose deploy roominfo --type="ClusterIP" --port=8080
 
