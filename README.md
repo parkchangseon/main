@@ -286,22 +286,6 @@ import org.springframework.data.repository.PagingAndSortingRepository;
 public interface PromotionRepository extends PagingAndSortingRepository<Promotion, Long> {
 }
 ```
-- 적용 후 REST API 의 테스트
-```
-#결제 및 프로모션 등록
-http post http://promotion:8080/promotions paymentId=1 paymentPrice=100000 paymentStatus="Y" reserveStatus="promotion"
-http post http://promotion:8080/promotions paymentId=2 paymentPrice=60000 paymentStatus="Y" reserveStatus="promotion"
-http post http://promotion:8080/promotions paymentId=3 paymentPrice=10000 paymentStatus="Y" reserveStatus="promotion"
-
-#프로모션 조회
-http http://roomInfo:8080/roomInfoes
-```
-
-![프로모션적립](https://user-images.githubusercontent.com/69283816/97448771-56514700-1974-11eb-9d53-8b645320fb01.png)
-
-![프로모션확인](https://user-images.githubusercontent.com/69283816/97449302-dd9eba80-1974-11eb-81ed-822a6475af73.png)
-
-
 ## 동기식 호출 
 
 분석단계에서의 조건 중 하나로 결제(Reservation)->프로모션(Promotion) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 
@@ -335,13 +319,23 @@ public interface PaymentManagementService {
             payment.setPaymentPrice(getPaymentPrice());
             payment.setReservationNumber(getReservationNumber());
             payment.setReservationStatus(getReserveStatus()); 
-            payment.setService(getService()); 
-            payment.setPoint(getPoint()); 
+            
+            if (this.getPaymentPrice() >= 100000) {
+                payment.setService("DISCOUNT COUPON");
+                payment.setPoint(this.getPaymentPrice() / 10);
+            } else if (this.getPaymentPrice() >= 50000 && this.getPaymentPrice() < 100000) {
+                payment.setService("BEVERAGE");
+                payment.setPoint(this.getPaymentPrice() / 10);
+            } else {
+                payment.setPoint(this.getPaymentPrice() / 10);
+            }
             
             Application.applicationContext.getBean(PaymentManagementService.class).CompletePayment(payment);
           
     }
 ```
+![프로모션적립동기호출](https://user-images.githubusercontent.com/69283816/97467563-adace280-1987-11eb-8668-bb9f977fc399.png)
+![프로모션확인동기호출](https://user-images.githubusercontent.com/69283816/97467722-d3d28280-1987-11eb-8318-2e8fa924bc31.png)
 
 - 동기식으로 프로모션 요청시 결제 시스템 장애의 경우 프로모션 불가 확인 :
 ```
@@ -440,8 +434,8 @@ public class PolicyHandler{
 ```
 
 ## CQRS 패턴 
-사용자 View를 위한 객실 정보 조회 서비스를 위한 별도의 객실 정보 저장소를 구현
-- 이를 하여 RoomInfo 서비스를 별도로 구축하고 저장 이력을 기록한다.
+사용자 View를 위한 프로모션 정보 조회 서비스를 위한 별도의 프로모션 정보 저장소를 구현
+- 이를 하여 기존 CQRS 서비스인 RoomInfo 서비스를 활용
 - 모든 정보는 비동기 방식으로 호출한다.
 
 ```
@@ -465,17 +459,6 @@ public class Promotion {
             couponSaved.setPaymentPrice(paymentPrice);
             couponSaved.setPaymentStatus(paymentStatus);
 
-            if("Y".equals(paymentStatus)) {
-                if (paymentPrice >= 100000) {
-                    service = "DISCOUNT COUPON";
-                } else if (paymentPrice >= 50000 && paymentPrice < 100000) {
-                    service = "BEVERAGE";
-                } else {
-                    point = paymentPrice / 10;
-                }
-            } else {
-                point = 0;
-            }
             BeanUtils.copyProperties(this, couponSaved);
 
             couponSaved.publishAfterCommit();
@@ -520,6 +503,8 @@ public class PolicyHandler{
         }
     }
 }
+
+
 
 ```
 # API 게이트웨이
