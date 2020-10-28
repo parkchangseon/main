@@ -783,17 +783,6 @@ kubectl get deploy payment -w
 - 새버전으로의 배포 시작
 
 - seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
-```
-Transactions:		        2962 hits
-Availability:		       80.45 %
-Elapsed time:		       29.99 secs
-Data transferred:	        0.75 MB
-Response time:		        0.01 secs
-Transaction rate:	       98.77 trans/sec
-Throughput:		        0.02 MB/sec
-Concurrency:		       1.46
-```
-
 
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
 
