@@ -128,7 +128,6 @@
 
 2. 장애격리
  - 객실관리시스템이 수행되지 않더라도 프로모션은 365일 24시간 제공될 수 있어야 한다 Async (event-driven), Eventual Consistency
- -> 결제 완료시 프로모션연결 및 확정처리:  App(front) 에서 Room 마이크로서비스로 예약요청이 전달되는 과정에 있어서 Room 마이크로 서비스가 별도의 배포주기를 가지기 때문에 Eventual Consistency 방식으로 트랜잭션 처리함.
  - 결제시스템이 과중되면 사용자를 잠시동안 받지 않고 프로모션을 잠시후에 하도록 유도한다 Circuit breaker, fallback
  
 3. 성능
