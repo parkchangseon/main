@@ -114,34 +114,7 @@
 
 ## Event Storming 결과
 * MSAEz 로 모델링한 이벤트스토밍 결과: 
-https://www.msaez.io/#/storming/vK3Ti7jb85Q5GVnPwKO5ecQpjRJ2/every/a1a546e3387be89639c5a1c96210c4bb/-MKbLyDZELkpG9pKR7Qa
-
-### 바운디드 컨텍스트로 묶기
-
-![image](https://user-images.githubusercontent.com/69283674/97152594-79cd9380-17b4-11eb-9bbe-5e0f02421917.png)
-
-    - 도메인 서열 분리 
-        - Core Domain:  Reservation : 없어서는 안될 핵심 서비스이며, 연간 Up-time SLA 수준을 99.999% 목표, 배포주기는 app 의 경우 1주일 1회 미만
-        - Supporting Domain:   Room : 경쟁력을 내기위한 서비스이며, SLA 수준은 연간 60% 이상 uptime 목표, 배포주기는 각 팀의 자율이나 표준 스프린트 주기가 1주일 이므로 1주일 1회 이상을 기준으로 함.
-        - General Domain:   Payment : 결제서비스로 3rd Party 외부 서비스를 사용하는 것이 경쟁력이 높음 
-
-### 폴리시 부착 (괄호는 수행주체, 폴리시 부착을 둘째단계에서 해놔도 상관 없음. 전체 연계가 초기에 드러남)
-
-![image](https://user-images.githubusercontent.com/69283674/97152713-a4b7e780-17b4-11eb-9bb5-8f498bf5de5f.png)
-
-
-### 폴리시의 이동과 컨텍스트 매핑 (점선은 Pub/Sub, 실선은 Req/Resp)
-
-![image](https://user-images.githubusercontent.com/69283674/97153018-2871d400-17b5-11eb-9773-276a38813eb9.png)
-
-
-### 1차 완성본
-
-![image](https://user-images.githubusercontent.com/69283674/97153154-63740780-17b5-11eb-904e-74bb90a97738.png)
-
-### 기능적 요구사항을 커버하는지 검증(1)
-
-![image](https://user-images.githubusercontent.com/69283674/97153235-81416c80-17b5-11eb-8d93-ab678184e2c7.png)
+![eventstorming](https://user-images.githubusercontent.com/69283816/97456229-024a6080-197c-11eb-8905-1481b645a583.png)
 
 기능적 요구사항
 
