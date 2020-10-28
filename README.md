@@ -114,7 +114,7 @@
 
 ## Event Storming 결과
 * MSAEz 로 모델링한 이벤트스토밍 결과: 
-![eventstorming](https://user-images.githubusercontent.com/69283816/97456229-024a6080-197c-11eb-8905-1481b645a583.png)
+![이벤트스토밍](https://user-images.githubusercontent.com/69283816/97504967-558fd380-19bb-11eb-9659-e05dc1662765.png)
 
 기능적 요구사항
 
