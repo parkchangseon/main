@@ -285,7 +285,7 @@ public interface PromotionRepository extends PagingAndSortingRepository<Promotio
 ```
 ## 동기식 호출 
 
-분석단계에서의 조건 중 하나로 결제(Reservation)->프로모션(Promotion) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 
+분석단계에서의 조건 중 하나로 예약(Reservation)-> 결제(Payment) -> 프로모션(Promotion) 간의 호출은 동기식 일관성을 유지하는 트랜잭션으로 처리하기로 하였다. 
 호출 프로토콜은 이미 앞서 Rest Repository 에 의해 노출되어있는 REST 서비스를 FeignClient 를 이용하여 호출하도록 한다. 
 
 ```
