@@ -527,9 +527,10 @@ Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 
 
 * 서킷 브레이킹 프레임워크의 선택: Spring FeignClient + Hystrix 옵션을 사용하여 구현함
 
-시나리오는 예약(Reservation)-->결제(Payment)-->프로모션(Promotion) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 결제 요청이 과도할 경우 CB 를 통하여 장애격리.
+시나리오는 예약(Reservation)-->결제(Payment)-->프로모션(Promotion) 시의 연결을 RESTful Request/Response 로 연동하여 구현이 되어있고, 
+결제 요청이 과도할 경우 서킷브레이커 를 통하여 장애격리.
 
-- Hystrix 를 설정:  요청처리 쓰레드에서 처리시간이 610 밀리가 넘어서기 시작하여 어느정도 유지되면 CB 회로가 닫히도록 (요청을 빠르게 실패처리, 차단) 설정
+- Hystrix 를 설정:  요청처리 쓰레드에서 처리시간이 610 밀리가 넘어서기 시작하여 어느정도 유지되면 서킷브레이커 회로가 닫히도록 (요청을 빠르게 실패처리, 차단) 설정
 ```
 # application.yml
 
@@ -563,7 +564,7 @@ hystrix:
 ![Hystrix에러로그](https://user-images.githubusercontent.com/69283816/97472480-39753d80-198d-11eb-9ac2-ba4ceb6778c6.png)
 
 ### 오토스케일 아웃
-앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
+앞서 서킷브레이커 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
 
 - 결제서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
@@ -577,7 +578,7 @@ kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
 
 ![image](https://user-images.githubusercontent.com/69283674/97291666-8f62bc00-188d-11eb-9594-c14a11328bb0.png)
 
-- CB 에서 했던 방식대로 워크로드를 1분 동안 걸어준다.
+- 서킷브레이커 에서 했던 방식대로 워크로드를 1분 동안 걸어준다.
 ```
 siege -c100 -t60S -content-type "application/json" 'http://payment:8080/payments'
 
@@ -594,7 +595,7 @@ kubectl get deploy payment -w
 
 ### 무정지 재배포
 
-- 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 CB 설정을 제거함
+- 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 서킷브레이커 설정을 제거함
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ![image](https://user-images.githubusercontent.com/69283674/97297532-837af800-1895-11eb-868d-f7c70ab6b3c6.png)
 
