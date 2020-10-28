@@ -551,12 +551,11 @@ public class PolicyHandler{
 }
 
 ```
-
 # API 게이트웨이
 Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정
 -  Gateway 설정 파일 
 
-![image](https://user-images.githubusercontent.com/69283674/97270866-279f7780-1873-11eb-958f-90ed7d0eec47.png)
+![Gateway 설정 파일](https://user-images.githubusercontent.com/69283816/97454613-4c324700-197a-11eb-8048-a09a23514556.png)
 
 
 # 운영
@@ -609,7 +608,6 @@ hystrix:
             }
     }
 ```
-
 
 ### 오토스케일 아웃
 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
