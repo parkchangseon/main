@@ -664,4 +664,4 @@ Delivery의 depolyment.yml 소스설정
  - 원복 후, 정상 확인
  
 ![image](https://user-images.githubusercontent.com/68646938/97521787-a5819100-19e1-11eb-9128-346c9693ff9a.PNG)
-![image](https://user-images.githubusercontent.com/68646938/97521665-62272280-19e1-11eb-8c3e-75a4facbf7e7.PNG)
+![liveness3](https://user-images.githubusercontent.com/69283816/97523029-889a8d00-19e4-11eb-868f-d8987951b2aa.png)
