@@ -663,9 +663,9 @@ Promotion 의 depolyment.yml 소스설정
 
  - describe 확인 (kubectl describe deploy delivery)
  
-![liveness4](https://user-images.githubusercontent.com/69283816/97523890-aa950f00-19e6-11eb-9591-62b6b7e3ee9f.png)
+![livenessDesc](https://user-images.githubusercontent.com/69283816/97525193-9f8fae00-19e9-11eb-8c70-dbf08704c049.png)
 
  - 원복 후, 정상 확인
  
-![image](https://user-images.githubusercontent.com/68646938/97521787-a5819100-19e1-11eb-9128-346c9693ff9a.PNG)
+![livenessAuto](https://user-images.githubusercontent.com/69283816/97525256-bc2be600-19e9-11eb-9017-a24befc88159.png)
 ![liveness3](https://user-images.githubusercontent.com/69283816/97523029-889a8d00-19e4-11eb-868f-d8987951b2aa.png)
