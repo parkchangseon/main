@@ -629,12 +629,12 @@ kubectl get deploy promotion -w
 - 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscale과 CB 설정을 제거하였으며,
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ```
-siege -c100 -t150S  --content-type "application/json" 'http://delivery:8080/deliveries POST  {"reserveStatus":"reserve","reservationNumber":1,"deliveryStatus":"DeliveryCompleted"}'
+siege -c100 -t150S  --content-type "application/json" 'http://promotion:8080/promotions POST  {"reserveStatus":"reserve","reservationNumber":1,"status":"promotion"}'
 ```
 
 - 새버전으로의 배포 시작
 ```
-kubectl set image deploy delivery delivery=team421acr.azurecr.io/delivery:latest
+kubectl set image deploy promotion promotion=team04acrpark.azurecr.io/promotion:latest
 ```
 
 - seige 의 화면으로 넘어가서 Availability 가 100% 미만으로 떨어졌는지 확인
