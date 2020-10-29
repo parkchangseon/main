@@ -511,8 +511,6 @@ public class PolicyHandler{
     }
 }
 
-![CQRS](https://user-images.githubusercontent.com/69283816/97469033-498b1e00-1989-11eb-90b5-dbff227dc7cd.png)
-
 ```
 # API 게이트웨이
 Cloud 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정
