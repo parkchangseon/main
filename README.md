@@ -591,7 +591,7 @@ hystrix:
 
 - application.yaml 파일 설정
 
-![applicationyml](https://user-images.githubusercontent.com/69283816/97516542-a8c34f80-19d6-11eb-995c-7102f5cca6ae.png)
+![applicationyml](https://user-images.githubusercontent.com/69283816/97521354-c1d0fe00-19e0-11eb-8f72-4eb0cea7e0f3.png)
 
 - paymentService 파일 설정
 
