@@ -359,7 +359,7 @@ http post http://promotion:8080/promotions paymentId=1 paymentPrice=100000 payme
 
 프로모션 적용 이후 이를 예약 정보 서비스를 비동기로 호출하여 개별적으로 조회 가능하도록 구현
  
-- 이를 위하여 프로모션 이력에 기록을 남긴 후에 곧바로 프로모션 정보가 등록 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
+- 이를 위하여 프로모션 서비스에서 ReserStatus를 promotion 으로 셋팅 후에 곧바로 프로모션 정보가 등록 되었다는 도메인 이벤트를 카프카로 송출한다(Publish)
  
 ```
 package accommodation;
