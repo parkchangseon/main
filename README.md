@@ -624,25 +624,6 @@ kubectl get deploy promotion -w
 ```
 ![image](https://user-images.githubusercontent.com/68646938/97516605-cbedff00-19d6-11eb-8e1f-dfda900db9f2.PNG)
 
-- 결제서비스의 deployment.yaml의 spec에 아래와 같이 자원속성을 설정한다:
-
-![image](https://user-images.githubusercontent.com/69283674/97291666-8f62bc00-188d-11eb-9594-c14a11328bb0.png)
-
-- 서킷브레이커 에서 했던 방식대로 워크로드를 1분 동안 걸어준다.
-```
-siege -c100 -t60S -content-type "application/json" 'http://payment:8080/payments'
-
-```
-- 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다:
-```
-kubectl get deploy payment -w
-```
-
-- siege 의 로그를 보아도 전체적인 성공률이 높아진 것을 확인 할 수 있다. 
-
-![image](https://user-images.githubusercontent.com/69283674/97295982-5fb6b280-1893-11eb-89ef-741b220b2201.png)
-
-
 ### 무정지 재배포
 
 - 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscaler 이나 서킷브레이커 설정을 제거함
