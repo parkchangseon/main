@@ -622,7 +622,7 @@ siege -c200 -t120S   --content-type "application/json" 'http://promotion:8080/pr
 ```
 kubectl get deploy promotion -w
 ```
-![image](https://user-images.githubusercontent.com/68646938/97516605-cbedff00-19d6-11eb-8e1f-dfda900db9f2.PNG)
+![오토스케일10개](https://user-images.githubusercontent.com/69283816/97520554-dc09dc80-19de-11eb-825e-2567e2a225fc.png)
 
 ### 무정지 재배포
 
