@@ -655,7 +655,7 @@ Promotion 의 depolyment.yml 소스설정
  - http get방식에서 tcp방식으로 변경, 서비스포트 8080이 아닌 8081로 포트 변경하였다.
 
 ![liveness1](https://user-images.githubusercontent.com/69283816/97522908-407b6a80-19e4-11eb-8b06-2145505466f4.png)
-![liveness2](https://user-images.githubusercontent.com/69283816/97522922-483b0f00-19e4-11eb-9f73-775bed84caa8.png)
+![desc0](https://user-images.githubusercontent.com/69283816/97531202-09628480-19f7-11eb-946f-94da4d9a6608.png)
 
  - describe 확인 (kubectl describe deploy delivery)
  
