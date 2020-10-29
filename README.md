@@ -664,4 +664,4 @@ Promotion 의 depolyment.yml 소스설정
  - 원복 후, 정상 확인
  
 ![livenessAuto](https://user-images.githubusercontent.com/69283816/97525256-bc2be600-19e9-11eb-9017-a24befc88159.png)
-![liveness3](https://user-images.githubusercontent.com/69283816/97523029-889a8d00-19e4-11eb-868f-d8987951b2aa.png)
+![livenessdesc2](https://user-images.githubusercontent.com/69283816/97530818-424e2980-19f6-11eb-9cef-81a97f097502.png)
