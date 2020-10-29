@@ -571,8 +571,14 @@ hystrix:
     }
 ```
 
-![결제요청시오류](https://user-images.githubusercontent.com/69283816/97472584-527dee80-198d-11eb-90a7-d9e3790f6975.png)
-![Hystrix에러로그](https://user-images.githubusercontent.com/69283816/97472480-39753d80-198d-11eb-9ac2-ba4ceb6778c6.png)
+* 부하테스터 siege 툴을 통한 서킷 브레이커 동작 확인:
+- 동시사용자 1명
+- 10초 동안 실시
+
+![서킷브레이커](https://user-images.githubusercontent.com/69283816/97518037-c8a84280-19d9-11eb-91d5-03af97f9034e.png)
+
+- 운영시스템은 죽지 않고 지속적으로 CB 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
+하지만, 50%밖에 성공하지 못하였고 고객 사용성에 있어 좋지 않기 때문에 Retry 설정과 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
 ## Configmap
 - configmap.yaml 파일설정
