@@ -602,7 +602,7 @@ hystrix:
 ![image](https://user-images.githubusercontent.com/69283816/97519329-70bf0b00-19dc-11eb-822c-74d5f1e31e34.png)
 
 ### 오토스케일 아웃
-앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
+앞서 서킷브레이커 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
 - 프로모션 서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
 
@@ -626,7 +626,7 @@ kubectl get deploy promotion -w
 
 ### 무정지 재배포
 
-- 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscale과 CB 설정을 제거하였으며,
+- 먼저 무정지 재배포가 100% 되는 것인지 확인하기 위해서 Autoscale과 서킷브레이커 설정을 제거하였으며,
 - seige 로 배포작업 직전에 워크로드를 모니터링 함.
 ```
 siege -c100 -t150S  --content-type "application/json" 'http://promotion:8080/promotions POST  {"reserveStatus":"reserve","reservationNumber":1,"status":"promotion"}'
