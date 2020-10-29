@@ -649,7 +649,7 @@ kubectl set image deploy promotion promotion=team04acrpark.azurecr.io/promotion:
 
 - 동일한 시나리오로 재배포 한 후 Availability 확인:
 
-![image](https://user-images.githubusercontent.com/68646938/97520325-4b330100-19de-11eb-883c-b4e895f8c0fb.PNG)
+![Readniess](https://user-images.githubusercontent.com/69283816/97523422-9a306480-19e5-11eb-8932-73f8735a40d5.png)
 
 배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
 
