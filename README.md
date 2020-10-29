@@ -440,7 +440,6 @@ public class PolicyHandler{
 }
 
 ```
-
 ## CQRS 패턴 
 사용자 View를 위한 프로모션 정보 조회 서비스를 위한 별도의 프로모션 정보 저장소를 구현
 - 이를 하여 기존 CQRS 서비스인 RoomInfo 서비스를 활용
