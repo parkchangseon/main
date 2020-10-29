@@ -574,6 +574,24 @@ hystrix:
 ![결제요청시오류](https://user-images.githubusercontent.com/69283816/97472584-527dee80-198d-11eb-90a7-d9e3790f6975.png)
 ![Hystrix에러로그](https://user-images.githubusercontent.com/69283816/97472480-39753d80-198d-11eb-9ac2-ba4ceb6778c6.png)
 
+## Configmap
+- configmap.yaml 파일설정
+
+![image](https://user-images.githubusercontent.com/68535067/97378420-a8a74f00-1905-11eb-94e6-f76f9e9fda40.png)
+
+- deployment.yaml파일 설정
+![image](https://user-images.githubusercontent.com/68535067/97378494-c8d70e00-1905-11eb-8e8e-208ade4772fe.png)
+
+- application.yaml 파일 설정
+![image](https://user-images.githubusercontent.com/68535067/97378559-edcb8100-1905-11eb-804d-e8c61afed969.png)
+
+- paymentService 파일 설정
+![image](https://user-images.githubusercontent.com/68535067/97378637-28351e00-1906-11eb-8774-98d9dd0eee0e.png)
+
+
+- 80포트로 설정하여 테스트
+![image](https://user-images.githubusercontent.com/68535067/97378359-8ad9ea00-1905-11eb-952d-641a380a02c9.png)
+
 ### 오토스케일 아웃
 앞서 서킷브레이커 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
