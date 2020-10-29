@@ -199,8 +199,10 @@ public class Promotion {
             if("Y".equals(paymentStatus)) {
                 if (paymentPrice >= 100000) {
                     service = "DISCOUNT COUPON";
+                    point = paymentPrice / 10;
                 } else if (paymentPrice >= 50000 && paymentPrice < 100000) {
                     service = "BEVERAGE";
+                    point = paymentPrice / 10;
                 } else {
                     point = paymentPrice / 10;
                 }
