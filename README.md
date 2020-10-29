@@ -599,7 +599,7 @@ hystrix:
 
 - 80포트로 설정하여 테스트
 
-![configmaptest](https://user-images.githubusercontent.com/69283816/97516634-e2945600-19d6-11eb-93a9-e586d1ec8edd.png)
+![image](https://user-images.githubusercontent.com/69283816/97519329-70bf0b00-19dc-11eb-822c-74d5f1e31e34.png)
 
 ### 오토스케일 아웃
 앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
@@ -623,7 +623,6 @@ siege -c200 -t120S   --content-type "application/json" 'http://delivery:8080/del
 kubectl get deploy delivery -w
 ```
 ![image](https://user-images.githubusercontent.com/68646938/97516605-cbedff00-19d6-11eb-8e1f-dfda900db9f2.PNG)
-
 
 - 결제서비스의 deployment.yaml의 spec에 아래와 같이 자원속성을 설정한다:
 
