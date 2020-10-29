@@ -653,7 +653,7 @@ kubectl set image deploy promotion promotion=team04acrpark.azurecr.io/promotion:
 
 배포기간 동안 Availability 가 변화없기 때문에 무정지 재배포가 성공한 것으로 확인됨.
 
-## Livness구현
+## Liveness구현
 
 Promotion 의 depolyment.yml 소스설정
  - http get방식에서 tcp방식으로 변경, 서비스포트 8080이 아닌 8081로 포트 변경하였다.
