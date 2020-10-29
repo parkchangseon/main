@@ -579,23 +579,6 @@ hystrix:
 - 운영시스템은 죽지 않고 지속적으로 서킷 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
 하지만, 50%밖에 성공하지 못하였고 고객 사용성에 있어 좋지 않기 때문에 Retry 설정과 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
-## Configmap(설정 정보를 저장해놓는 일종의 저장소 역할)
-- configmap.yaml 파일설정
-
-![configmapyml](https://user-images.githubusercontent.com/69283816/97529262-de763180-19f2-11eb-9959-5c6fe8a11601.png)
-
-- deployment.yaml파일 설정
-
-![deploymentyml](https://user-images.githubusercontent.com/69283816/97529241-d3bb9c80-19f2-11eb-94ac-b8b07fb9ceb3.png)
-
-- application.yaml 파일 설정
-
-![applicationyml](https://user-images.githubusercontent.com/69283816/97529197-ba1a5500-19f2-11eb-8470-fb4a160708bf.png)
-
-- paymentService 파일 설정
-
-![paymentservice](https://user-images.githubusercontent.com/69283816/97529303-f5b51f00-19f2-11eb-8d60-11e4b739ab86.png)
-
 ### 오토스케일 아웃
 앞서 서킷브레이커 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
@@ -664,3 +647,20 @@ Promotion 의 depolyment.yml 소스설정
  
 ![desc2](https://user-images.githubusercontent.com/69283816/97531073-bd174480-19f6-11eb-9c13-e5c6d7d83343.png)
 ![desc3](https://user-images.githubusercontent.com/69283816/97531083-c43e5280-19f6-11eb-81fe-a0c0a5cb006d.png)
+
+## Configmap(설정 정보를 저장해놓는 일종의 저장소 역할)
+- configmap.yaml 파일설정
+
+![configmapyml](https://user-images.githubusercontent.com/69283816/97529262-de763180-19f2-11eb-9959-5c6fe8a11601.png)
+
+- deployment.yaml파일 설정
+
+![deploymentyml](https://user-images.githubusercontent.com/69283816/97529241-d3bb9c80-19f2-11eb-94ac-b8b07fb9ceb3.png)
+
+- application.yaml 파일 설정
+
+![applicationyml](https://user-images.githubusercontent.com/69283816/97529197-ba1a5500-19f2-11eb-8470-fb4a160708bf.png)
+
+- paymentService 파일 설정
+
+![paymentservice](https://user-images.githubusercontent.com/69283816/97529303-f5b51f00-19f2-11eb-8d60-11e4b739ab86.png)
