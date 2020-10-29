@@ -663,7 +663,7 @@ Promotion 의 depolyment.yml 소스설정
 
  - describe 확인 (kubectl describe deploy delivery)
  
-![image](https://user-images.githubusercontent.com/68646938/97521153-4c652d80-19e0-11eb-8b23-acf46176c4c7.PNG)
+![liveness4](https://user-images.githubusercontent.com/69283816/97523890-aa950f00-19e6-11eb-9591-62b6b7e3ee9f.png)
 
  - 원복 후, 정상 확인
  
