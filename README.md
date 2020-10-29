@@ -98,7 +98,6 @@
 
 # 분석/설계
 
-
 ## AS-IS 조직 (Horizontally-Aligned)
 ![image](https://user-images.githubusercontent.com/69283674/97150539-99af8800-17b1-11eb-8b8e-c6b8bcd1d537.png)
 
@@ -132,7 +131,7 @@
 
 ## 헥사고날 아키텍처 다이어그램 도출
     
-![헥사고날](https://user-images.githubusercontent.com/69283816/97509124-bb348d80-19c4-11eb-91f5-1fdc2c1b57cb.png)
+![image](https://user-images.githubusercontent.com/69283816/97513646-2a63af00-19d0-11eb-9251-8653fc54299c.png)
 
     - Inbound adaptor와 Outbound adaptor를 구분함
     - 호출관계에서 PubSub 과 Req/Resp 를 구분함
