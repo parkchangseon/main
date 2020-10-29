@@ -655,7 +655,7 @@ kubectl set image deploy promotion promotion=team04acrpark.azurecr.io/promotion:
 
 ## Livness구현
 
-Delivery의 depolyment.yml 소스설정
+Promotion 의 depolyment.yml 소스설정
  - http get방식에서 tcp방식으로 변경, 서비스포트 8080이 아닌 8081로 포트 변경하였다.
 
 ![liveness1](https://user-images.githubusercontent.com/69283816/97522908-407b6a80-19e4-11eb-8b06-2145505466f4.png)
