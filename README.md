@@ -510,7 +510,7 @@ public class PolicyHandler{
 
 ```
 # API 게이트웨이
-Clous 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정
+Cloud 환경에서는 //서비스명:8080 에서 Gateway API가 작동해야함 application.yml 파일에 profile별 gateway 설정
 -  Gateway 설정 파일 
 
 ![Gateway 설정 파일](https://user-images.githubusercontent.com/69283816/97454613-4c324700-197a-11eb-8048-a09a23514556.png)
