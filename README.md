@@ -580,15 +580,19 @@ hystrix:
 ![configmapyml](https://user-images.githubusercontent.com/69283816/97516523-9b0dca00-19d6-11eb-987b-822b196113d1.png)
 
 - deployment.yaml파일 설정
+
 ![deploymentyml](https://user-images.githubusercontent.com/69283816/97516535-a234d800-19d6-11eb-9aff-9f6230d088e8.png)
 
 - application.yaml 파일 설정
+
 ![applicationyml](https://user-images.githubusercontent.com/69283816/97516542-a8c34f80-19d6-11eb-995c-7102f5cca6ae.png)
 
 - paymentService 파일 설정
+
 ![paymentservice](https://user-images.githubusercontent.com/69283816/97516610-d3ada380-19d6-11eb-8bd3-07093a58b054.png)
 
 - 80포트로 설정하여 테스트
+
 ![configmaptest](https://user-images.githubusercontent.com/69283816/97516634-e2945600-19d6-11eb-93a9-e586d1ec8edd.png)
 
 ### 오토스케일 아웃
