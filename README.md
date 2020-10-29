@@ -583,23 +583,19 @@ hystrix:
 ## Configmap(설정 정보를 저장해놓는 일종의 저장소 역할)
 - configmap.yaml 파일설정
 
-![configmapyml](https://user-images.githubusercontent.com/69283816/97516523-9b0dca00-19d6-11eb-987b-822b196113d1.png)
+![configmapyml](https://user-images.githubusercontent.com/69283816/97529262-de763180-19f2-11eb-9959-5c6fe8a11601.png)
 
 - deployment.yaml파일 설정
 
-![deploymentyml](https://user-images.githubusercontent.com/69283816/97516535-a234d800-19d6-11eb-9aff-9f6230d088e8.png)
+![deploymentyml](https://user-images.githubusercontent.com/69283816/97529241-d3bb9c80-19f2-11eb-94ac-b8b07fb9ceb3.png)
 
 - application.yaml 파일 설정
 
-![applicationyml](https://user-images.githubusercontent.com/69283816/97521354-c1d0fe00-19e0-11eb-8f72-4eb0cea7e0f3.png)
+![applicationyml](https://user-images.githubusercontent.com/69283816/97529197-ba1a5500-19f2-11eb-8470-fb4a160708bf.png)
 
 - paymentService 파일 설정
 
-![paymentservice](https://user-images.githubusercontent.com/69283816/97516610-d3ada380-19d6-11eb-8bd3-07093a58b054.png)
-
-- 80포트로 설정하여 테스트
-
-![image](https://user-images.githubusercontent.com/69283816/97519329-70bf0b00-19dc-11eb-822c-74d5f1e31e34.png)
+![paymentservice](https://user-images.githubusercontent.com/69283816/97529303-f5b51f00-19f2-11eb-8d60-11e4b739ab86.png)
 
 ### 오토스케일 아웃
 앞서 서킷브레이커 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
