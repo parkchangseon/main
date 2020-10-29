@@ -602,14 +602,27 @@ hystrix:
 ![configmaptest](https://user-images.githubusercontent.com/69283816/97516634-e2945600-19d6-11eb-93a9-e586d1ec8edd.png)
 
 ### 오토스케일 아웃
-앞서 서킷브레이커 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
+앞서 CB 는 시스템을 안정되게 운영할 수 있게 해줬지만 사용자의 요청을 100% 받아들여주지 못했기 때문에 이에 대한 보완책으로 자동화된 확장 기능을 적용하고자 한다. 
 
+- 배송서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
 
-- 결제서비스에 대한 replica 를 동적으로 늘려주도록 HPA 를 설정한다. 설정은 CPU 사용량이 15프로를 넘어서면 replica 를 10개까지 늘려준다:
 ```
-kubectl autoscale deploy payment --min=1 --max=10 --cpu-percent=15
+kubectl autoscale deploy delivery --min=1 --max=10 --cpu-percent=15
 ```
-![image](https://user-images.githubusercontent.com/69283674/97295328-7b6d8900-1892-11eb-9581-f40d9b09b5de.png)
+![image](https://user-images.githubusercontent.com/68646938/97516602-cb556880-19d6-11eb-96a5-978c2519e0b7.PNG)
+
+- 워크로드를 걸어준다.
+```
+siege -c200 -t120S   --content-type "application/json" 'http://delivery:8080/deliveries POST  {"reserveStatus":"reserve","reservationNumber":1,"deliveryStatus":"DeliveryCompleted"}'
+```
+![image](https://user-images.githubusercontent.com/68646938/97516567-b8db2f00-19d6-11eb-81e3-30b181e016d4.PNG)
+
+- 오토스케일이 어떻게 되고 있는지 모니터링을 걸어둔다
+- 어느정도 시간이 흐른 후 스케일 아웃이 벌어지는 것을 확인할 수 있다
+```
+kubectl get deploy delivery -w
+```
+![image](https://user-images.githubusercontent.com/68646938/97516605-cbedff00-19d6-11eb-8e1f-dfda900db9f2.PNG)
 
 
 - 결제서비스의 deployment.yaml의 spec에 아래와 같이 자원속성을 설정한다:
