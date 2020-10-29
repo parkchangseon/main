@@ -136,6 +136,12 @@
     - Inbound adaptor와 Outbound adaptor를 구분함
     - 호출관계에서 PubSub 과 Req/Resp 를 구분함
     - 서브 도메인과 바운디드 컨텍스트의 분리:  각 팀의 KPI 별로 아래와 같이 관심 구현 스토리를 나눠가짐
+    
+## 폴리글랏
+
+Promotion 서비스 pom.xml에서 H2 DB -> Hsql DB로 변경
+
+![폴리글랏](https://user-images.githubusercontent.com/69283816/97514532-4bc59a80-19d2-11eb-8306-23e9ad7415fa.png)
 
 # 구현:
 
