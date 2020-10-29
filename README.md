@@ -662,8 +662,10 @@ Delivery의 depolyment.yml 소스설정
 ![image](https://user-images.githubusercontent.com/68646938/97521464-f2b13300-19e0-11eb-98f3-7c0b8506e6c8.PNG)
  
  - describe 확인 (kubectl describe deploy delivery)
+ 
 ![image](https://user-images.githubusercontent.com/68646938/97521153-4c652d80-19e0-11eb-8b23-acf46176c4c7.PNG)
  
  - 원복 후, 정상 확인
+ 
 ![image](https://user-images.githubusercontent.com/68646938/97521787-a5819100-19e1-11eb-9128-346c9693ff9a.PNG)
 ![image](https://user-images.githubusercontent.com/68646938/97521665-62272280-19e1-11eb-8c3e-75a4facbf7e7.PNG)
