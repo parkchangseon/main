@@ -580,7 +580,7 @@ hystrix:
 - 운영시스템은 죽지 않고 지속적으로 서킷 에 의하여 적절히 회로가 열림과 닫힘이 벌어지면서 자원을 보호하고 있음을 보여줌.
 하지만, 50%밖에 성공하지 못하였고 고객 사용성에 있어 좋지 않기 때문에 Retry 설정과 동적 Scale out (replica의 자동적 추가,HPA) 을 통하여 시스템을 확장 해주는 후속처리가 필요.
 
-## Configmap(설 정보를 저장해놓는 일종의 저장소 역할)
+## Configmap(설정 정보를 저장해놓는 일종의 저장소 역할)
 - configmap.yaml 파일설정
 
 ![configmapyml](https://user-images.githubusercontent.com/69283816/97516523-9b0dca00-19d6-11eb-987b-822b196113d1.png)
